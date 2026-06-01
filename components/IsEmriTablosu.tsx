@@ -4,9 +4,9 @@ import { Trash2, ClipboardList } from "lucide-react";
 import type { IsEmri } from "@/data/types";
 
 const VARDİYA_ETIKET: Record<string, string> = {
-  sabah: "🌅 Sabah",
-  oglen: "☀️ Öğlen",
-  gece:  "🌙 Gece",
+  sabah: "1. Vardiya 08:15-18:00",
+  oglen: "2. Vardiya 18:00-08:15",
+  gece:  "Gece",
 };
 
 interface Props {

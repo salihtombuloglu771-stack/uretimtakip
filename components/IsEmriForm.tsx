@@ -153,9 +153,8 @@ export default function IsEmriForm({ onKaydet }: Props) {
             <select name="vardiya" value={form.vardiya} onChange={handleChange}
               className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
             >
-              <option value="sabah">🌅 Sabah (06:00–14:00)</option>
-              <option value="oglen">☀️ Öğlen (14:00–22:00)</option>
-              <option value="gece">🌙 Gece (22:00–06:00)</option>
+              <option value="sabah">1. Vardiya (08:15 – 18:00)</option>
+              <option value="oglen">2. Vardiya (18:00 – 08:15)</option>
             </select>
           </div>
           <InputAlani label="Tarih" name="tarih" type="date" value={form.tarih} onChange={handleChange} />

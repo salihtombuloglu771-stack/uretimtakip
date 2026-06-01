@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
-import AuthGuard, { getRol } from "@/components/AuthGuard";
+import AuthGuard from "@/components/AuthGuard";
 import { PauseCircle, PlusCircle, Trash2 } from "lucide-react";
 import type { Durus, DurusNeden, Makina } from "@/data/types";
 
@@ -28,16 +28,12 @@ export default function DurusKaydiPage() {
   });
   const [hata,     setHata]    = useState("");
   const [loaded,   setLoaded]  = useState(false);
-  // useState+useEffect ile okumak zorunlu: getRol() direkt çağrısı SSR'da null döner,
-  // hydration mismatch oluşur ve React sil butonunu eklemez.
-  const [isAdmin,  setIsAdmin] = useState(false);
 
   useEffect(() => {
     const v1 = localStorage.getItem(DEPO);
     if (v1) try { setListe(JSON.parse(v1)); } catch {}
     const v2 = localStorage.getItem("uretim_makinalar");
     if (v2) try { setMakinalar(JSON.parse(v2)); } catch {}
-    setIsAdmin(getRol() === "admin");
     setLoaded(true);
   }, []);
 
@@ -186,7 +182,7 @@ export default function DurusKaydiPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50">
-                    {["Makina", "Neden", "Başlangıç", "Bitiş", "Süre", "Açıklama", ...(isAdmin ? [""] : [])].map((b) => (
+                    {["Makina", "Neden", "Başlangıç", "Bitiş", "Süre", "Açıklama", ""].map((b) => (
                       <th key={b} className="px-4 py-3 text-left text-slate-500 text-xs uppercase tracking-wide font-medium whitespace-nowrap">{b}</th>
                     ))}
                   </tr>
@@ -206,14 +202,12 @@ export default function DurusKaydiPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-slate-500 text-xs">{d.aciklama || "—"}</td>
-                        {isAdmin && (
-                          <td className="px-4 py-3">
-                            <button onClick={() => setListe((p) => p.filter((x) => x.id !== d.id))}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                              <Trash2 size={14} />
-                            </button>
-                          </td>
-                        )}
+                        <td className="px-4 py-3">
+                          <button onClick={() => setListe((p) => p.filter((x) => x.id !== d.id))}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
