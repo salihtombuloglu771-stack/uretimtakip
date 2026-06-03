@@ -53,7 +53,7 @@ export default function GirisPage() {
       } else {
         localStorage.removeItem(HATIRLA_ANAHTARI);
       }
-      router.replace("/");
+      router.replace("/anasayfa");
     } else {
       setHata("Kullanıcı adı veya şifre hatalı.");
       setYukleniyor(false);

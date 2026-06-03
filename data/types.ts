@@ -10,6 +10,7 @@ export interface IsEmri {
   hedefAdedi?: number;                          // opsiyonel — eski kayıtlar bozulmasın
   vardiya?: "sabah" | "oglen" | "gece";         // opsiyonel — eski kayıtlar bozulmasın
   tarih: string;
+  kayitYapan?: string;
 }
 export type YeniIsEmri = Omit<IsEmri, "id">;
 
@@ -73,6 +74,7 @@ export interface DepoHareketi {
   hareketTuru: HareketTuru;
   tarih: string;
   aciklama?: string;
+  kayitYapan?: string;
 }
 
 // ─── Malzeme ──────────────────────────────────────────────────────────────────
@@ -84,6 +86,7 @@ export interface Malzeme {
   stokMiktari: number;
   birimFiyat?: number;
   fotograf?: string;   // base64 data URL
+  kayitYapan?: string;
 }
 
 // ─── Sabit Kıymet / Demirbaş ─────────────────────────────────────────────────
@@ -116,6 +119,16 @@ export interface Kullanici {
   rol: KullaniciRol;
 }
 
+// ─── Mesajlaşma ───────────────────────────────────────────────────────────────
+export interface Mesaj {
+  id: string;
+  gonderen: string;       // kullanıcı adı
+  alici: string;          // kullanıcı adı
+  icerik: string;
+  tarih: string;          // ISO datetime
+  okundu: boolean;
+}
+
 // ─── Kalite Kontrol ───────────────────────────────────────────────────────────
 export type KaliteKontrolSonuc = "gecti" | "kaldi";
 
@@ -129,4 +142,5 @@ export interface KaliteKontrol {
   uygunsuzAdet: number;
   sonuc: KaliteKontrolSonuc;
   aciklama?: string;
+  kayitYapan?: string;
 }

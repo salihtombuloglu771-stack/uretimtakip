@@ -17,7 +17,7 @@ export default function UretimEmriPage() {
   }, []);
 
   async function handleKaydet(yeni: YeniIsEmri) {
-    const id = await addIsEmri(yeni);
+    const id = await addIsEmri(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
     const kayit: IsEmri = { ...yeni, id };
     setIsEmriListesi((p) => [...p, kayit]);
     setSonKayit(yeni.isEmriNo);

@@ -76,7 +76,7 @@ export default function KaliteKontrolPage() {
       sonuc:         form.sonuc,
       aciklama:      form.aciklama.trim() || undefined,
     };
-    const id = await addKaliteKontrol(yeni);
+    const id = await addKaliteKontrol(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
     setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...BOSLUK, kontrolEden: p.kontrolEden }));
   }

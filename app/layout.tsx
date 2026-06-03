@@ -4,6 +4,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import GlobalCamera from "@/components/GlobalCamera";
+import MesajBildirim from "@/components/MesajBildirim";
 
 export const metadata: Metadata = {
   title: "NexPlan",
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body>
         {children}
         <GlobalCamera />
+        <MesajBildirim />
       </body>
     </html>
   );

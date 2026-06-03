@@ -12,18 +12,21 @@ const mapIE = (r: any): IsEmri => ({
   urunAdi: r.urun_adi, uretimAdedi: r.uretim_adedi, fireAdedi: r.fire_adedi,
   birimFiyat: r.birim_fiyat ?? 0, hedefAdedi: r.hedef_adedi ?? undefined,
   vardiya: r.vardiya ?? undefined, tarih: r.tarih,
+  kayitYapan: r.kayit_yapan ?? undefined,
 });
 export const getIsEmirleri = async (): Promise<IsEmri[]> => {
-  const { data } = await supabase.from("is_emirleri").select("*").order("created_at");
+  const { data } = await supabase.from("is_emirleri").select("*").order("created_at", { ascending: false });
   return (data ?? []).map(mapIE);
 };
-export const addIsEmri = async (v: YeniIsEmri): Promise<string> => {
+export const addIsEmri = async (v: YeniIsEmri, kayitYapan?: string): Promise<string> => {
   const id = crypto.randomUUID();
-  await supabase.from("is_emirleri").insert({
+  const base = {
     id, is_emri_no: v.isEmriNo, makina_no: v.makinaNo, urun_adi: v.urunAdi,
     uretim_adedi: v.uretimAdedi, fire_adedi: v.fireAdedi, birim_fiyat: v.birimFiyat,
     hedef_adedi: v.hedefAdedi ?? null, vardiya: v.vardiya ?? null, tarih: v.tarih,
-  });
+  };
+  const { error } = await supabase.from("is_emirleri").insert({ ...base, kayit_yapan: kayitYapan ?? null });
+  if (error) await supabase.from("is_emirleri").insert(base);
   return id;
 };
 export const deleteIsEmri = async (id: string) =>
@@ -141,19 +144,21 @@ export const deleteDepoHareketi = async (id: string) =>
 const mapMalzeme = (r: any): Malzeme => ({
   id: r.id, malzemeKodu: r.malzeme_kodu, malzemeAdi: r.malzeme_adi,
   birim: r.birim, stokMiktari: r.stok_miktari, birimFiyat: r.birim_fiyat ?? undefined,
-  fotograf: r.fotograf ?? undefined,
+  fotograf: r.fotograf ?? undefined, kayitYapan: r.kayit_yapan ?? undefined,
 });
 export const getMalzemeler = async (): Promise<Malzeme[]> => {
-  const { data } = await supabase.from("malzemeler").select("*").order("created_at");
+  const { data } = await supabase.from("malzemeler").select("*").order("created_at", { ascending: false });
   return (data ?? []).map(mapMalzeme);
 };
-export const addMalzeme = async (v: Omit<Malzeme, "id">): Promise<string> => {
+export const addMalzeme = async (v: Omit<Malzeme, "id">, kayitYapan?: string): Promise<string> => {
   const id = crypto.randomUUID();
-  await supabase.from("malzemeler").insert({
+  const base = {
     id, malzeme_kodu: v.malzemeKodu, malzeme_adi: v.malzemeAdi,
     birim: v.birim, stok_miktari: v.stokMiktari, birim_fiyat: v.birimFiyat ?? null,
     fotograf: v.fotograf ?? null,
-  });
+  };
+  const { error } = await supabase.from("malzemeler").insert({ ...base, kayit_yapan: kayitYapan ?? null });
+  if (error) await supabase.from("malzemeler").insert(base);
   return id;
 };
 export const updateMalzemeFotograf = async (id: string, fotograf: string) =>
@@ -215,18 +220,21 @@ const mapKalite = (r: any): KaliteKontrol => ({
   kontrolTarihi: r.kontrol_tarihi, kontrolEden: r.kontrol_eden,
   uygunAdet: r.uygun_adet, uygunsuzAdet: r.uygunsuz_adet,
   sonuc: r.sonuc, aciklama: r.aciklama ?? undefined,
+  kayitYapan: r.kayit_yapan ?? undefined,
 });
 export const getKaliteKontroller = async (): Promise<KaliteKontrol[]> => {
-  const { data } = await supabase.from("kalite_kontrol").select("*").order("created_at");
+  const { data } = await supabase.from("kalite_kontrol").select("*").order("created_at", { ascending: false });
   return (data ?? []).map(mapKalite);
 };
-export const addKaliteKontrol = async (v: Omit<KaliteKontrol, "id">): Promise<string> => {
+export const addKaliteKontrol = async (v: Omit<KaliteKontrol, "id">, kayitYapan?: string): Promise<string> => {
   const id = crypto.randomUUID();
-  await supabase.from("kalite_kontrol").insert({
+  const base = {
     id, is_emri_no: v.isEmriNo, urun_adi: v.urunAdi, kontrol_tarihi: v.kontrolTarihi,
     kontrol_eden: v.kontrolEden, uygun_adet: v.uygunAdet, uygunsuz_adet: v.uygunsuzAdet,
     sonuc: v.sonuc, aciklama: v.aciklama ?? null,
-  });
+  };
+  const { error } = await supabase.from("kalite_kontrol").insert({ ...base, kayit_yapan: kayitYapan ?? null });
+  if (error) await supabase.from("kalite_kontrol").insert(base);
   return id;
 };
 export const deleteKaliteKontrol = async (id: string) =>

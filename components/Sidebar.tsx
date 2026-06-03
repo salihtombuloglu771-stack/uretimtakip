@@ -6,21 +6,28 @@ import {
   LayoutDashboard, ClipboardList, Wrench, ChevronRight, ChevronDown,
   LogOut, BookOpen, FilePlus, PauseCircle,
   Archive, Truck, Package, Layers, Building, Play,
-  BarChart2, Users, ShieldCheck, Shield,
+  BarChart2, Users, ShieldCheck, Shield, MessageSquare, Home,
 } from "lucide-react";
 import { getRol, OTURUM_ANAHTARI, ROL_ANAHTARI } from "./AuthGuard";
 import { useEffect, useState } from "react";
 import type { KullaniciRol } from "@/data/types";
+import { okunmamisSayisi } from "@/lib/mesajlar";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
-  const [rol,      setRol]      = useState<KullaniciRol | null>(null);
-  const [depoAcik, setDepoAcik] = useState(false);
+  const [rol,         setRol]         = useState<KullaniciRol | null>(null);
+  const [depoAcik,    setDepoAcik]    = useState(false);
+  const [okunmamis,   setOkunmamis]   = useState(0);
 
   useEffect(() => {
     setRol(getRol());
     if (pathname.startsWith("/depo")) setDepoAcik(true);
+    const ad = localStorage.getItem("uretim_kullanici_adi") ?? "";
+    if (!ad) return;
+    okunmamisSayisi(ad).then(setOkunmamis);
+    const id = setInterval(() => okunmamisSayisi(ad).then(setOkunmamis), 10_000);
+    return () => clearInterval(id);
   }, [pathname]);
 
   function handleCikis() {
@@ -40,7 +47,7 @@ export default function Sidebar() {
   }
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard",         href: "/"                 },
+    { icon: Home,            label: "Ana Sayfa",         href: "/anasayfa"         },
     { icon: BarChart2,       label: "Raporlar",           href: "/raporlar"         },
     { icon: FilePlus,        label: "Üretim Emri Gir",   href: "/uretim-emri"      },
     { icon: ClipboardList,   label: "İş Emirleri",       href: "/is-emirleri"      },
@@ -50,6 +57,7 @@ export default function Sidebar() {
     { icon: PauseCircle,     label: "Duruş Kaydı",       href: "/durus-kaydi"      },
     { icon: Wrench,          label: "Makinalar",          href: "/makinalar"        },
     { icon: Users,           label: "Personel",           href: "/personel"         },
+    { icon: MessageSquare,   label: "Mesajlar",           href: "/mesajlar"         },
   ];
 
   const depoAktif = pathname.startsWith("/depo");
@@ -74,7 +82,10 @@ export default function Sidebar() {
             <Link key={item.href} href={item.href} className={linkClass(item.href)}>
               <Icon size={16} />
               <span className="flex-1">{item.label}</span>
-              {isActive && <ChevronRight size={14} />}
+              {item.href === "/mesajlar" && okunmamis > 0
+                ? <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">{okunmamis}</span>
+                : isActive && <ChevronRight size={14} />
+              }
             </Link>
           );
         })}

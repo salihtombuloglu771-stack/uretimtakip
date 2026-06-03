@@ -63,7 +63,7 @@ export default function MalzemePage() {
       birimFiyat:  isNaN(fiyat) ? undefined : fiyat,
       fotograf:    formFotograf ?? undefined,
     };
-    const id = await addMalzeme(yeni);
+    const id = await addMalzeme(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
     setFormFotograf(null);
@@ -150,7 +150,7 @@ export default function MalzemePage() {
         stokMiktari: isNaN(stok) ? 0 : stok,
         birimFiyat:  isNaN(fiyat) ? undefined : fiyat,
       };
-      const id = await addMalzeme(yeni);
+      const id = await addMalzeme(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
       setListe((p) => [...p, { ...yeni, id }]);
       eklenen++;
     }
