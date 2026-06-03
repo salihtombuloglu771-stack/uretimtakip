@@ -1,38 +1,26 @@
 "use client";
 
-// Bu sayfa operatörlerin hızlıca üretim emri girmesi için tasarlandı.
-// Dashboard'dan farklı olarak sadece form var — tabloya gerek yok.
-
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import IsEmriForm from "@/components/IsEmriForm";
+import { getIsEmirleri, addIsEmri } from "@/lib/db";
 import { FilePlus, CheckCircle } from "lucide-react";
 import type { IsEmri, YeniIsEmri } from "@/data/types";
 
-const DEPO = "uretim_is_emirleri";
-
 export default function UretimEmriPage() {
   const [isEmriListesi, setIsEmriListesi] = useState<IsEmri[]>([]);
-  const [loaded,        setLoaded]        = useState(false);
-  const [sonKayit,      setSonKayit]      = useState<string | null>(null);
+  const [sonKayit, setSonKayit] = useState<string | null>(null);
 
   useEffect(() => {
-    const veri = localStorage.getItem(DEPO);
-    if (veri) try { setIsEmriListesi(JSON.parse(veri)); } catch {}
-    setLoaded(true);
+    getIsEmirleri().then(setIsEmriListesi);
   }, []);
 
-  useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(DEPO, JSON.stringify(isEmriListesi));
-  }, [isEmriListesi, loaded]);
-
-  function handleKaydet(yeniVeri: YeniIsEmri) {
-    const yeniKayit: IsEmri = { ...yeniVeri, id: crypto.randomUUID() };
-    setIsEmriListesi((p) => [...p, yeniKayit]);
-    setSonKayit(yeniVeri.isEmriNo);
-    // 3 saniye sonra başarı mesajını gizle
+  async function handleKaydet(yeni: YeniIsEmri) {
+    const id = await addIsEmri(yeni);
+    const kayit: IsEmri = { ...yeni, id };
+    setIsEmriListesi((p) => [...p, kayit]);
+    setSonKayit(yeni.isEmriNo);
     setTimeout(() => setSonKayit(null), 3000);
   }
 
@@ -45,8 +33,7 @@ export default function UretimEmriPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-slate-800 text-xl font-bold flex items-center gap-2">
-              <FilePlus size={22} className="text-blue-500" />
-              Üretim Emri Gir
+              <FilePlus size={22} className="text-blue-500" /> Üretim Emri Gir
             </h1>
             <p className="text-slate-500 text-sm mt-0.5">Yeni üretim emrini buradan kaydet</p>
           </div>
@@ -58,7 +45,6 @@ export default function UretimEmriPage() {
           </div>
         </div>
 
-        {/* Başarı mesajı */}
         {sonKayit && (
           <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-3">
             <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
@@ -70,7 +56,6 @@ export default function UretimEmriPage() {
 
         <IsEmriForm onKaydet={handleKaydet} />
 
-        {/* Son 5 kayıt özeti */}
         {isEmriListesi.length > 0 && (
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <h3 className="text-slate-700 font-semibold text-sm mb-3">Son Kayıtlar</h3>

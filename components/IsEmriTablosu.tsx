@@ -5,7 +5,7 @@ import type { IsEmri } from "@/data/types";
 
 const VARDİYA_ETIKET: Record<string, string> = {
   sabah: "1. Vardiya 08:15-18:00",
-  oglen: "2. Vardiya 18:00-08:15",
+  oglen: "2. Vardiya 18:00-02:00",
   gece:  "Gece",
 };
 

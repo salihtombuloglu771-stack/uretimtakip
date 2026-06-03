@@ -5,8 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { PauseCircle, PlusCircle, Trash2 } from "lucide-react";
 import type { Durus, DurusNeden, Makina } from "@/data/types";
+import { getDuruslar, addDurus, deleteDurus, getMakinalar } from "@/lib/db";
 
-const DEPO = "uretim_durus";
 const NEDEN_ETIKET: Record<DurusNeden, string> = {
   ariza:    "🔴 Arıza",
   bakim:    "🔧 Bakım",
@@ -21,26 +21,21 @@ const simdikiZaman = () => {
 };
 
 export default function DurusKaydiPage() {
-  const [liste,    setListe]   = useState<Durus[]>([]);
+  const [liste,     setListe]    = useState<Durus[]>([]);
   const [makinalar, setMakinalar] = useState<Makina[]>([]);
-  const [form,     setForm]    = useState<{ makinaNo: string; baslangicTarihi: string; bitisTarihi: string; neden: DurusNeden; aciklama: string }>({
+  const [form,      setForm]     = useState<{ makinaNo: string; baslangicTarihi: string; bitisTarihi: string; neden: DurusNeden; aciklama: string }>({
     makinaNo: "", baslangicTarihi: simdikiZaman(), bitisTarihi: simdikiZaman(), neden: "ariza", aciklama: "",
   });
-  const [hata,     setHata]    = useState("");
-  const [loaded,   setLoaded]  = useState(false);
+  const [hata,    setHata]    = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const v1 = localStorage.getItem(DEPO);
-    if (v1) try { setListe(JSON.parse(v1)); } catch {}
-    const v2 = localStorage.getItem("uretim_makinalar");
-    if (v2) try { setMakinalar(JSON.parse(v2)); } catch {}
-    setLoaded(true);
+    Promise.all([getDuruslar(), getMakinalar()]).then(([durusData, makinaData]) => {
+      setListe(durusData);
+      setMakinalar(makinaData);
+      setLoading(false);
+    });
   }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(DEPO, JSON.stringify(liste));
-  }, [liste, loaded]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
@@ -52,7 +47,7 @@ export default function DurusKaydiPage() {
     return Math.max(0, Math.round(fark / 60000));
   }
 
-  function handleEkle(e: React.FormEvent) {
+  async function handleEkle(e: React.FormEvent) {
     e.preventDefault();
     if (!form.makinaNo) { setHata("Makina seçiniz."); return; }
     if (new Date(form.bitisTarihi) <= new Date(form.baslangicTarihi)) {
@@ -60,11 +55,37 @@ export default function DurusKaydiPage() {
       return;
     }
     setHata("");
-    setListe((p) => [...p, { ...form, id: crypto.randomUUID() }]);
+    const yeni: Omit<Durus, "id"> = {
+      makinaNo: form.makinaNo,
+      baslangicTarihi: form.baslangicTarihi,
+      bitisTarihi: form.bitisTarihi,
+      neden: form.neden,
+      aciklama: form.aciklama,
+    };
+    const id = await addDurus(yeni);
+    setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...p, baslangicTarihi: simdikiZaman(), bitisTarihi: simdikiZaman(), aciklama: "" }));
   }
 
+  async function handleSil(id: string) {
+    await deleteDurus(id);
+    setListe((p) => p.filter((x) => x.id !== id));
+  }
+
   const toplamDk = liste.reduce((t, d) => t + sureDk(d.baslangicTarihi, d.bitisTarihi), 0);
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="flex min-h-screen bg-slate-100">
+          <Sidebar />
+          <main className="flex-1 ml-60 p-6 flex items-center justify-center">
+            <p className="text-slate-500 text-sm">Yükleniyor…</p>
+          </main>
+        </div>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -203,7 +224,7 @@ export default function DurusKaydiPage() {
                         </td>
                         <td className="px-4 py-3 text-slate-500 text-xs">{d.aciklama || "—"}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => setListe((p) => p.filter((x) => x.id !== d.id))}
+                          <button onClick={() => handleSil(d.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>

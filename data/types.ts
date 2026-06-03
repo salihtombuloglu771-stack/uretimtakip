@@ -48,3 +48,85 @@ export type YeniDurus = Omit<Durus, "id">;
 
 // ─── Kullanıcı Rolü ──────────────────────────────────────────────────────────
 export type KullaniciRol = "admin" | "operatör";
+
+// ─── Operasyon Takibi ─────────────────────────────────────────────────────────
+export interface Operasyon {
+  id: string;
+  isEmriId: string;
+  isEmriNo: string;
+  urunAdi: string;
+  makinaNo?: string;
+  baslangic: string;   // ISO datetime string
+  bitis?: string;      // ISO datetime string — undefined = hala aktif
+}
+
+// ─── Depo Hareketi ────────────────────────────────────────────────────────────
+export type DepoTuru     = "sevkiyat" | "uretim";
+export type HareketTuru  = "giris" | "cikis";
+
+export interface DepoHareketi {
+  id: string;
+  depoTuru: DepoTuru;
+  urunAdi: string;
+  miktar: number;
+  birim: string;
+  hareketTuru: HareketTuru;
+  tarih: string;
+  aciklama?: string;
+}
+
+// ─── Malzeme ──────────────────────────────────────────────────────────────────
+export interface Malzeme {
+  id: string;
+  malzemeKodu: string;
+  malzemeAdi: string;
+  birim: string;
+  stokMiktari: number;
+  birimFiyat?: number;
+  fotograf?: string;   // base64 data URL
+}
+
+// ─── Sabit Kıymet / Demirbaş ─────────────────────────────────────────────────
+export interface DemirbasKayit {
+  id: string;
+  demirbasNo: string;
+  demirbasAdi: string;
+  konum?: string;
+  alisTarihi?: string;
+  alisFiyati?: number;
+  durum: "aktif" | "pasif";
+}
+
+// ─── Personel ─────────────────────────────────────────────────────────────────
+export interface Personel {
+  id: string;
+  sicilNo: string;
+  adSoyad: string;
+  departman: string;
+  pozisyon: string;
+  vardiya?: "sabah" | "oglen";
+  durum: "aktif" | "pasif";
+  iseGirisTarihi?: string;
+}
+
+// ─── Kullanıcı Yönetimi ───────────────────────────────────────────────────────
+export interface Kullanici {
+  id: string;
+  kullaniciAdi: string;
+  rol: KullaniciRol;
+}
+
+// ─── Kalite Kontrol ───────────────────────────────────────────────────────────
+export type KaliteKontrolSonuc = "gecti" | "kaldi";
+
+export interface KaliteKontrol {
+  id: string;
+  isEmriNo: string;
+  urunAdi: string;
+  kontrolTarihi: string;
+  kontrolEden: string;
+  uygunAdet: number;
+  uygunsuzAdet: number;
+  sonuc: KaliteKontrolSonuc;
+  aciklama?: string;
+}

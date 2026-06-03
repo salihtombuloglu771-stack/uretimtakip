@@ -3,10 +3,16 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import GlobalCamera from "@/components/GlobalCamera";
 
 export const metadata: Metadata = {
-  title: "Üretim Takip Portalı",
-  description: "Fabrika iş emri ve üretim takip sistemi",
+  title: "NexPlan",
+  description: "NexPlan — Üretim planlama ve takip ERP sistemi",
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -16,7 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
-      <body>{children}</body>
+      <body>
+        {children}
+        <GlobalCamera />
+      </body>
     </html>
   );
 }

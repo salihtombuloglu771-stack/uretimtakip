@@ -59,6 +59,7 @@ Kolonlar:
 ---
 
 ### 4. Tasarım
+* Daha gelişmis bir erp olsun erp de olmasın gereken ne varsa eklermisin 
 * ŞİFRELİ GİRİŞ OLSUN 
 * Modern ERP tarzı görünüm
 * Açık tema
@@ -82,8 +83,16 @@ Kolonlar:
 Hedef Takibi	Her iş emrine hedef adet gir, gerçekleşen vs hedef karşılaştır
 Vardiya Takibi	Sabah / öğle / gece vardiyasını kayda ekle
 Duruş Kaydı	Makina arıza/duruş sürelerini takip et
-
-Özellik	Ne işe yarar?
+operasyon işlemleri girilen üretim emrinin opersayon başlat durdur olsun operasyonu baslatınca ne kadar zaman çalışmıs takip etsin 
+Sol sekmede depo olsun depo ya başınca ikiye ayrılsın sevkiyat depo üretim depo diye 
+Sol sekmede malzeme kaydedeceğim bir sey olsun bütün kaydettiğim malzemeleri malzemelerde göreyim 
+Sol sekmede sabit kıymet diye bişey olsun ona başınca demirbaş listesi açılsın ordan demirbaşları gire bileyim 
+VARDİYA SAATLERİ 8.15 18.00  18.00 02.00 OLSUN 
+ANA SAYFA OLSUN O SAYFADA BÜTÜN KAYITLI MALZEMELERİ GÖREYİM 
+EXXEL OLARAK ÇEKEBİLEYİM KAYITLI MALZEMELERİ DOSYA EKLEYEBİLEYİM 
+MALZEME EKLEME YEŞİLARTI BUTONU OLSUN HER SEFERİNDE MALZEME EKLEMEK İÇİN ORAYA TIKLANIP GİRİLSİN 
+ürün adet kontrol ederken fotoğraf çekme butonu olasun malzemenin fotğrafını çekince direk itede o adet görülsün ve ona bağlı iş emrine gitsin 
+YETKİLENDİRME OLSUN 
 Çoklu Kullanıcı	Admin / operatör rolleri, farklı yetki seviyeleri
 Bakım Takibi	Makinaların son bakım tarihini ve sonraki bakım tarihi
 Bildirim Sistemi	Fire oranı %10'u geçince uyarı göster

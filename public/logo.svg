@@ -1,0 +1,22 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1D4ED8" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Arkaplan -->
+  <rect width="48" height="48" rx="12" fill="url(#a)" filter="url(#s)"/>
+  <!-- N harfi — sol dikey çubuk -->
+  <rect x="10" y="11" width="7" height="26" rx="2" fill="white"/>
+  <!-- N harfi — sağ dikey çubuk -->
+  <rect x="31" y="11" width="7" height="26" rx="2" fill="white"/>
+  <!-- N harfi — köşegen şerit -->
+  <polygon points="10,11 17,11 38,37 31,37" fill="white"/>
+  <!-- Plan simgesi — 3 küçük çizgi (alt sağ köşe) -->
+  <rect x="32" y="13" width="5" height="2" rx="1" fill="white" opacity="0.45"/>
+  <rect x="32" y="17" width="4" height="2" rx="1" fill="white" opacity="0.3"/>
+</svg>

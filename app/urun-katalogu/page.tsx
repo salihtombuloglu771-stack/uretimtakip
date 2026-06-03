@@ -6,34 +6,29 @@ import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { BookOpen, PlusCircle, Trash2 } from "lucide-react";
 import type { Urun } from "@/data/types";
-
-const DEPO = "uretim_urunler";
+import { getUrunler, addUrun, deleteUrun } from "@/lib/db";
 
 export default function UrunKataloguPage() {
-  const [liste,   setListe]  = useState<Urun[]>([]);
-  const [form,    setForm]   = useState<{ urunKodu: string; urunAdi: string; birimFiyat: string }>({ urunKodu: "", urunAdi: "", birimFiyat: "" });
-  const [hata,    setHata]   = useState("");
-  const [loaded,  setLoaded] = useState(false);
+  const [liste,   setListe]   = useState<Urun[]>([]);
+  const [form,    setForm]    = useState<{ urunKodu: string; urunAdi: string; birimFiyat: string }>({ urunKodu: "", urunAdi: "", birimFiyat: "" });
+  const [hata,    setHata]    = useState("");
+  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const veri = localStorage.getItem(DEPO);
-    if (veri) try { setListe(JSON.parse(veri)); } catch {}
     setIsAdmin(getRol() === "admin");
-    setLoaded(true);
+    getUrunler().then((data) => {
+      setListe(data);
+      setLoading(false);
+    });
   }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(DEPO, JSON.stringify(liste));
-  }, [liste, loaded]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   }
 
-  function handleEkle(e: React.FormEvent) {
+  async function handleEkle(e: React.FormEvent) {
     e.preventDefault();
     if (!form.urunKodu.trim() || !form.urunAdi.trim()) {
       setHata("Ürün kodu ve adı zorunludur.");
@@ -45,13 +40,32 @@ export default function UrunKataloguPage() {
     }
     const fiyat = parseFloat(form.birimFiyat.replace(",", "."));
     setHata("");
-    setListe((p) => [...p, {
-      id: crypto.randomUUID(),
+    const yeni: Omit<Urun, "id"> = {
       urunKodu:   form.urunKodu.trim(),
       urunAdi:    form.urunAdi.trim(),
       birimFiyat: isNaN(fiyat) ? 0 : fiyat,
-    }]);
+    };
+    const id = await addUrun(yeni);
+    setListe((p) => [...p, { ...yeni, id }]);
     setForm({ urunKodu: "", urunAdi: "", birimFiyat: "" });
+  }
+
+  async function handleSil(id: string) {
+    await deleteUrun(id);
+    setListe((p) => p.filter((u) => u.id !== id));
+  }
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="flex min-h-screen bg-slate-100">
+          <Sidebar />
+          <main className="flex-1 ml-60 p-6 flex items-center justify-center">
+            <p className="text-slate-500 text-sm">Yükleniyor…</p>
+          </main>
+        </div>
+      </AuthGuard>
+    );
   }
 
   return (
@@ -150,7 +164,7 @@ export default function UrunKataloguPage() {
                       </td>
                       {isAdmin && (
                         <td className="px-5 py-3.5">
-                          <button onClick={() => setListe((p) => p.filter((u) => u.id !== urun.id))}
+                          <button onClick={() => handleSil(urun.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>

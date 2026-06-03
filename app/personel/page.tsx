@@ -1,0 +1,238 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Sidebar from "@/components/Sidebar";
+import AuthGuard from "@/components/AuthGuard";
+import { getRol } from "@/components/AuthGuard";
+import { Users, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
+import type { Personel } from "@/data/types";
+import { getPersonel, addPersonel, deletePersonel } from "@/lib/db";
+
+interface FormState {
+  sicilNo: string; adSoyad: string; departman: string;
+  pozisyon: string; vardiya: string; durum: "aktif" | "pasif"; iseGirisTarihi: string;
+}
+
+const BOSLUK: FormState = {
+  sicilNo: "", adSoyad: "", departman: "", pozisyon: "",
+  vardiya: "sabah", durum: "aktif", iseGirisTarihi: "",
+};
+
+export default function PersonelPage() {
+  const [liste,   setListe]   = useState<Personel[]>([]);
+  const [form,    setForm]    = useState<FormState>(BOSLUK);
+  const [hata,    setHata]    = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(getRol() === "admin");
+    getPersonel().then((data) => {
+      setListe(data);
+      setLoading(false);
+    });
+  }, []);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    const { name, value } = e.target;
+    setForm((p) => ({ ...p, [name]: value }));
+  }
+
+  async function handleEkle(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.sicilNo.trim() || !form.adSoyad.trim()) {
+      setHata("Sicil numarası ve ad soyad zorunludur."); return;
+    }
+    if (liste.some((p) => p.sicilNo.toLowerCase() === form.sicilNo.trim().toLowerCase())) {
+      setHata("Bu sicil numarası zaten kayıtlı."); return;
+    }
+    setHata("");
+    const yeni: Omit<Personel, "id"> = {
+      sicilNo:        form.sicilNo.trim(),
+      adSoyad:        form.adSoyad.trim(),
+      departman:      form.departman.trim(),
+      pozisyon:       form.pozisyon.trim(),
+      vardiya:        form.vardiya as "sabah" | "oglen" | undefined,
+      durum:          form.durum,
+      iseGirisTarihi: form.iseGirisTarihi || undefined,
+    };
+    const id = await addPersonel(yeni);
+    setListe((p) => [...p, { ...yeni, id }]);
+    setForm(BOSLUK);
+  }
+
+  async function handleSil(id: string) {
+    await deletePersonel(id);
+    setListe((p) => p.filter((x) => x.id !== id));
+  }
+
+  const aktifSayi    = liste.filter((p) => p.durum === "aktif").length;
+  const departmanlar = [...new Set(liste.map((p) => p.departman).filter(Boolean))];
+
+  const VARDIYA_ETIKET: Record<string, string> = {
+    sabah: "1. Vardiya",
+    oglen: "2. Vardiya",
+  };
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="flex min-h-screen bg-slate-100">
+          <Sidebar />
+          <main className="flex-1 ml-60 p-6 flex items-center justify-center">
+            <p className="text-slate-500 text-sm">Yükleniyor…</p>
+          </main>
+        </div>
+      </AuthGuard>
+    );
+  }
+
+  return (
+    <AuthGuard>
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar />
+      <main className="flex-1 ml-60 p-6 space-y-6">
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-slate-800 text-xl font-bold">Personel</h1>
+            <p className="text-slate-500 text-sm mt-0.5">Çalışan kayıtları ve vardiya takibi</p>
+          </div>
+          <div className="text-slate-500 text-sm">
+            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </div>
+        </div>
+
+        {/* Özet */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white border border-blue-100 rounded-xl p-5 shadow-sm">
+            <p className="text-slate-500 text-xs uppercase tracking-wide">Toplam Personel</p>
+            <p className="text-blue-600 text-3xl font-bold mt-1">{liste.length}</p>
+          </div>
+          <div className="bg-white border border-emerald-100 rounded-xl p-5 shadow-sm">
+            <p className="text-slate-500 text-xs uppercase tracking-wide">Aktif</p>
+            <p className="text-emerald-600 text-3xl font-bold mt-1">{aktifSayi}</p>
+          </div>
+          <div className="bg-white border border-violet-100 rounded-xl p-5 shadow-sm">
+            <p className="text-slate-500 text-xs uppercase tracking-wide">Departman Sayısı</p>
+            <p className="text-violet-600 text-3xl font-bold mt-1">{departmanlar.length}</p>
+          </div>
+        </div>
+
+        {/* Form — sadece admin */}
+        {isAdmin && (
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <h2 className="text-slate-800 font-semibold text-base mb-5 flex items-center gap-2">
+              <PlusCircle size={18} className="text-blue-500" /> Yeni Personel Ekle
+            </h2>
+            <form onSubmit={handleEkle} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { label: "Sicil No",    name: "sicilNo",   placeholder: "ör. PRS-001"      },
+                  { label: "Ad Soyad",    name: "adSoyad",   placeholder: "ör. Ahmet Yılmaz" },
+                  { label: "Departman",   name: "departman", placeholder: "ör. Üretim"       },
+                  { label: "Pozisyon",    name: "pozisyon",  placeholder: "ör. Operatör"     },
+                ].map((f) => (
+                  <div key={f.name} className="flex flex-col gap-1.5">
+                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">{f.label}</label>
+                    <input name={f.name} value={(form as unknown as Record<string, string>)[f.name]}
+                      onChange={handleChange} placeholder={f.placeholder}
+                      className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors" />
+                  </div>
+                ))}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Vardiya</label>
+                  <select name="vardiya" value={form.vardiya} onChange={handleChange}
+                    className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                    <option value="sabah">1. Vardiya (08:15–18:00)</option>
+                    <option value="oglen">2. Vardiya (18:00–02:00)</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">İşe Giriş Tarihi</label>
+                  <input type="date" name="iseGirisTarihi" value={form.iseGirisTarihi} onChange={handleChange}
+                    className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Durum</label>
+                  <select name="durum" value={form.durum} onChange={handleChange}
+                    className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                    <option value="aktif">Aktif</option>
+                    <option value="pasif">Pasif</option>
+                  </select>
+                </div>
+              </div>
+              {hata && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">{hata}</p>}
+              <div className="flex justify-end">
+                <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
+                  <PlusCircle size={16} /> Ekle
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Liste */}
+        {liste.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
+            <Users size={40} className="text-slate-300" />
+            <p className="text-slate-500 text-sm">Henüz personel kaydı yok.</p>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-slate-800 font-semibold text-base flex items-center gap-2">
+                <Users size={18} className="text-blue-500" /> Personel Listesi
+              </h2>
+              <span className="text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-full">{liste.length} personel</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50">
+                    {["Sicil No", "Ad Soyad", "Departman", "Pozisyon", "Vardiya", "İşe Giriş", "Durum", ...(isAdmin ? [""] : [])].map((b) => (
+                      <th key={b} className="px-5 py-3 text-left text-slate-500 text-xs uppercase tracking-wide font-medium whitespace-nowrap">{b}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {liste.map((p, i) => (
+                    <tr key={p.id} className={`border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors ${i % 2 !== 0 ? "bg-slate-50/50" : ""}`}>
+                      <td className="px-5 py-3.5 text-blue-600 font-medium">{p.sicilNo}</td>
+                      <td className="px-5 py-3.5 text-slate-800 font-medium">{p.adSoyad}</td>
+                      <td className="px-5 py-3.5 text-slate-600">{p.departman || "—"}</td>
+                      <td className="px-5 py-3.5 text-slate-600">{p.pozisyon || "—"}</td>
+                      <td className="px-5 py-3.5 text-slate-500 text-xs">
+                        {p.vardiya ? VARDIYA_ETIKET[p.vardiya] : "—"}
+                      </td>
+                      <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">
+                        {p.iseGirisTarihi ? new Date(p.iseGirisTarihi).toLocaleDateString("tr-TR") : "—"}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                          p.durum === "aktif" ? "text-emerald-600 bg-emerald-100" : "text-slate-500 bg-slate-100"
+                        }`}>
+                          {p.durum === "aktif" ? <><CheckCircle size={11} /> Aktif</> : <><XCircle size={11} /> Pasif</>}
+                        </span>
+                      </td>
+                      {isAdmin && (
+                        <td className="px-5 py-3.5">
+                          <button onClick={() => handleSil(p.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+      </main>
+    </div>
+    </AuthGuard>
+  );
+}

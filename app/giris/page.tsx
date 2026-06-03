@@ -2,44 +2,62 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Factory, Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
+import { loginKullanici } from "@/lib/db";
 import type { KullaniciRol } from "@/data/types";
 
 const OTURUM_ANAHTARI = "uretim_oturum";
 const ROL_ANAHTARI    = "uretim_rol";
 
-// Kullanıcı hesapları — ilerleyen sürümde API'ye taşınabilir
-const HESAPLAR: { kullanici: string; sifre: string; rol: KullaniciRol }[] = [
+// Hardcoded fallback — Supabase kullanicilar tablosu yokken çalışır
+const FALLBACK: { kullanici: string; sifre: string; rol: KullaniciRol }[] = [
   { kullanici: "admin",    sifre: "1234", rol: "admin"    },
   { kullanici: "operatör", sifre: "1234", rol: "operatör" },
 ];
 
+const HATIRLA_ANAHTARI = "uretim_hatirla";
+
 export default function GirisPage() {
   const router = useRouter();
-  const [kullanici,   setKullanici]   = useState("");
-  const [sifre,       setSifre]       = useState("");
+  const [kullanici,   setKullanici]   = useState(() => {
+    try { return JSON.parse(localStorage.getItem(HATIRLA_ANAHTARI) ?? "{}").kullanici ?? ""; } catch { return ""; }
+  });
+  const [sifre,       setSifre]       = useState(() => {
+    try { return JSON.parse(localStorage.getItem(HATIRLA_ANAHTARI) ?? "{}").sifre ?? ""; } catch { return ""; }
+  });
+  const [beniHatirla, setBeniHatirla] = useState(() => !!localStorage.getItem(HATIRLA_ANAHTARI));
   const [sifreGoster, setSifreGoster] = useState(false);
   const [hata,        setHata]        = useState("");
   const [yukleniyor,  setYukleniyor]  = useState(false);
 
-  function handleGiris(e: React.FormEvent) {
+  async function handleGiris(e: React.FormEvent) {
     e.preventDefault();
     setYukleniyor(true);
     setHata("");
 
-    setTimeout(() => {
-      const hesap = HESAPLAR.find(
-        (h) => h.kullanici === kullanici.trim() && h.sifre === sifre
-      );
-      if (hesap) {
-        localStorage.setItem(OTURUM_ANAHTARI, "aktif");
-        localStorage.setItem(ROL_ANAHTARI, hesap.rol);
-        router.replace("/");
+    // Önce Supabase'den kontrol et
+    let hesap = await loginKullanici(kullanici.trim(), sifre);
+
+    // Supabase'de bulunamazsa hardcoded fallback'e bak
+    if (!hesap) {
+      const fb = FALLBACK.find(h => h.kullanici === kullanici.trim() && h.sifre === sifre);
+      if (fb) hesap = { rol: fb.rol };
+    }
+
+    if (hesap) {
+      localStorage.setItem(OTURUM_ANAHTARI, "aktif");
+      localStorage.setItem(ROL_ANAHTARI, hesap.rol);
+      localStorage.setItem("uretim_kullanici_adi", kullanici.trim());
+      if (beniHatirla) {
+        localStorage.setItem(HATIRLA_ANAHTARI, JSON.stringify({ kullanici: kullanici.trim(), sifre }));
       } else {
-        setHata("Kullanıcı adı veya şifre hatalı.");
-        setYukleniyor(false);
+        localStorage.removeItem(HATIRLA_ANAHTARI);
       }
-    }, 400);
+      router.replace("/");
+    } else {
+      setHata("Kullanıcı adı veya şifre hatalı.");
+      setYukleniyor(false);
+    }
   }
 
   return (
@@ -47,10 +65,8 @@ export default function GirisPage() {
       <div className="w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg mb-4">
-            <Factory size={28} className="text-white" />
-          </div>
-          <h1 className="text-slate-800 text-2xl font-bold">ÜretimTakip</h1>
+          <img src="/logo.svg" alt="NexPlan" className="w-16 h-16 mb-4 drop-shadow-xl" />
+          <h1 className="text-slate-800 text-2xl font-bold">NexPlan</h1>
           <p className="text-slate-500 text-sm mt-1">ERP Portal — Giriş Yap</p>
         </div>
 
@@ -86,6 +102,19 @@ export default function GirisPage() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2">
+              <input
+                id="beniHatirla"
+                type="checkbox"
+                checked={beniHatirla}
+                onChange={(e) => setBeniHatirla(e.target.checked)}
+                className="w-4 h-4 accent-blue-500 cursor-pointer"
+              />
+              <label htmlFor="beniHatirla" className="text-slate-500 text-sm cursor-pointer select-none">
+                Beni hatırla
+              </label>
+            </div>
+
             {hata && (
               <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">{hata}</p>
             )}
@@ -98,23 +127,9 @@ export default function GirisPage() {
             </button>
           </form>
 
-          {/* Hesap ipuçları */}
-          <div className="mt-6 space-y-1.5">
-            <p className="text-slate-400 text-xs text-center font-medium">Test Hesapları</p>
-            <div className="grid grid-cols-2 gap-2">
-              {HESAPLAR.map((h) => (
-                <button
-                  key={h.kullanici}
-                  type="button"
-                  onClick={() => { setKullanici(h.kullanici); setSifre(h.sifre); }}
-                  className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-100 transition-colors text-left"
-                >
-                  <span className="font-medium text-slate-700">{h.kullanici}</span>
-                  <span className="block text-slate-400">{h.rol === "admin" ? "Tam yetki" : "Kayıt ekleyebilir"}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <p className="mt-5 text-slate-400 text-xs text-center">
+            Kullanıcı hesabınız yoksa admin ile iletişime geçin.
+          </p>
         </div>
       </div>
     </div>
