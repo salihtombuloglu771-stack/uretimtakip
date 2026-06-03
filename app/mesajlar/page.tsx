@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiGetKullanicilar } from "@/lib/api";
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { MessageSquare, Send, Trash2, CheckCheck, Inbox, SendHorizonal } from "lucide-react";
 import { getMesajlar, addMesaj, markOkundu, deleteMesaj } from "@/lib/mesajlar";
-import { getKullanicilar } from "@/lib/db";
+
 import type { Mesaj } from "@/data/types";
 
 const FALLBACK_KULLANICILAR = ["admin", "operatör"];
@@ -27,7 +29,7 @@ export default function MesajlarPage() {
     setBenimAdi(ad);
     yenile();
 
-    getKullanicilar().then((data) => {
+    apiGetKullanicilar().then((data) => {
       const liste = data.map((k) => k.kullaniciAdi);
       const hepsi = Array.from(new Set([...FALLBACK_KULLANICILAR, ...liste]));
       setKullanicilar(hepsi.filter((k) => k !== ad));

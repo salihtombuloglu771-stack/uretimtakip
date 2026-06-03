@@ -1,12 +1,14 @@
 "use client";
 
+
+import { apiAddMakina, apiDeleteMakina, apiGetMakinalar, apiUpdateMakinaDurum } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Cpu, PlusCircle, Trash2, AlertTriangle } from "lucide-react";
 import type { Makina } from "@/data/types";
-import { getMakinalar, addMakina, deleteMakina, updateMakinaDurum } from "@/lib/db";
+
 
 interface FormState {
   makinaNo: string; makinaAdi: string; durum: "aktif" | "pasif";
@@ -38,7 +40,7 @@ export default function MakinalarPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getMakinalar().then((data) => {
+    apiGetMakinalar().then((data) => {
       setListe(data);
       setLoading(false);
     });
@@ -66,19 +68,19 @@ export default function MakinalarPage() {
       sonBakimTarihi:  form.sonBakimTarihi || undefined,
       bakimPeriyoduGun: isNaN(periyot) ? undefined : periyot,
     };
-    const id = await addMakina(yeni);
+    const { id } = await apiAddMakina(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
   }
 
   async function toggleDurum(m: Makina) {
     const yeniDurum = m.durum === "aktif" ? "pasif" : "aktif";
-    await updateMakinaDurum(m.id, yeniDurum);
+    await apiUpdateMakinaDurum(m.id, yeniDurum);
     setListe((p) => p.map((x) => x.id === m.id ? { ...x, durum: yeniDurum } : x));
   }
 
   async function handleSil(id: string) {
-    await deleteMakina(id);
+    await apiDeleteMakina(id);
     setListe((p) => p.filter((m) => m.id !== id));
   }
 

@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiAddKalite, apiDeleteKalite, apiGetIsEmirleri, apiGetKalite } from "@/lib/api";
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { ShieldCheck, PlusCircle, Trash2, CheckCircle, XCircle, Camera, X } from "lucide-react";
 import type { KaliteKontrol, IsEmri } from "@/data/types";
-import { getKaliteKontroller, addKaliteKontrol, deleteKaliteKontrol, getIsEmirleri } from "@/lib/db";
+
 
 interface FormState {
   isEmriNo: string; urunAdi: string; kontrolTarihi: string;
@@ -38,7 +40,7 @@ export default function KaliteKontrolPage() {
   }
 
   useEffect(() => {
-    Promise.all([getKaliteKontroller(), getIsEmirleri()]).then(([kaliteData, isData]) => {
+    Promise.all([apiGetKalite(), apiGetIsEmirleri()]).then(([kaliteData, isData]) => {
       setListe(kaliteData);
       setIsEmirleri(isData);
       setLoading(false);
@@ -76,13 +78,13 @@ export default function KaliteKontrolPage() {
       sonuc:         form.sonuc,
       aciklama:      form.aciklama.trim() || undefined,
     };
-    const id = await addKaliteKontrol(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
+    const { id } = await apiAddKalite(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...BOSLUK, kontrolEden: p.kontrolEden }));
   }
 
   async function handleSil(id: string) {
-    await deleteKaliteKontrol(id);
+    await apiDeleteKalite(id);
     setListe((p) => p.filter((x) => x.id !== id));
   }
 

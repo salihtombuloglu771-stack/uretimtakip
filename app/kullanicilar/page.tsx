@@ -1,10 +1,12 @@
 "use client";
 
+
+import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard, { getRol } from "@/components/AuthGuard";
 import { Shield, PlusCircle, Trash2, Eye, EyeOff } from "lucide-react";
-import { getKullanicilar, addKullanici, deleteKullanici } from "@/lib/db";
+
 import type { Kullanici, KullaniciRol } from "@/data/types";
 
 interface FormState {
@@ -30,7 +32,7 @@ export default function KullanicilarPage() {
     setIsAdmin(rol === "admin");
     const kulAdi = localStorage.getItem("uretim_kullanici_adi") ?? "";
     setMevcutKul(kulAdi);
-    getKullanicilar().then((data) => { setListe(data); setLoading(false); });
+    apiGetKullanicilar().then((data) => { setListe(data); setLoading(false); });
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -51,22 +53,21 @@ export default function KullanicilarPage() {
     }
     setHata("");
     try {
-      const id = await addKullanici(form.kullaniciAdi.trim(), form.sifre, form.rol);
+      const { id } = await apiAddKullanici({ kullaniciAdi: form.kullaniciAdi.trim(), sifre: form.sifre, rol: form.rol });
       setListe((p) => [...p, { id, kullaniciAdi: form.kullaniciAdi.trim(), rol: form.rol }]);
       setForm(BOSLUK);
       setBasari(`"${form.kullaniciAdi.trim()}" kullanıcısı eklendi.`);
       setTimeout(() => setBasari(""), 4000);
     } catch {
       setHata(
-        "Kayıt başarısız! Supabase'de 'kullanicilar' tablosu oluşturulmamış olabilir. " +
-        "SQL Editor'den tabloyu oluşturup tekrar deneyin."
+        "Kayıt başarısız! Bu kullanıcı adı zaten mevcut olabilir."
       );
     }
   }
 
   async function handleSil(kullanici: Kullanici) {
     if (kullanici.kullaniciAdi === mevcutKul) return; // kendini silemesin
-    await deleteKullanici(kullanici.id);
+    await apiDeleteKullanici(kullanici.id);
     setListe((p) => p.filter((k) => k.id !== kullanici.id));
   }
 

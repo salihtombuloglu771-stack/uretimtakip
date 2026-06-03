@@ -1,10 +1,12 @@
 "use client";
 
+
+import { apiAddIsEmri, apiGetIsEmirleri } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import IsEmriForm from "@/components/IsEmriForm";
-import { getIsEmirleri, addIsEmri } from "@/lib/db";
+
 import { FilePlus, CheckCircle } from "lucide-react";
 import type { IsEmri, YeniIsEmri } from "@/data/types";
 
@@ -13,11 +15,11 @@ export default function UretimEmriPage() {
   const [sonKayit, setSonKayit] = useState<string | null>(null);
 
   useEffect(() => {
-    getIsEmirleri().then(setIsEmriListesi);
+    apiGetIsEmirleri().then(setIsEmriListesi);
   }, []);
 
   async function handleKaydet(yeni: YeniIsEmri) {
-    const id = await addIsEmri(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
+    const { id } = await apiAddIsEmri(yeni);
     const kayit: IsEmri = { ...yeni, id };
     setIsEmriListesi((p) => [...p, kayit]);
     setSonKayit(yeni.isEmriNo);

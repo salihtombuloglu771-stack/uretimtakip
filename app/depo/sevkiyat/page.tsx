@@ -1,12 +1,14 @@
 "use client";
 
+
+import { apiAddDepo, apiDeleteDepo, apiGetDepo } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Truck, PlusCircle, Trash2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import type { DepoHareketi } from "@/data/types";
-import { getDepoHareketleri, addDepoHareketi, deleteDepoHareketi } from "@/lib/db";
+
 
 interface FormState {
   urunAdi: string; miktar: string; birim: string;
@@ -27,7 +29,7 @@ export default function SevkiyatDepoPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getDepoHareketleri().then((data) => {
+    apiGetDepo().then((data) => {
       setListe(data.filter((h) => h.depoTuru === "sevkiyat"));
       setLoading(false);
     });
@@ -53,13 +55,13 @@ export default function SevkiyatDepoPage() {
       tarih:       form.tarih,
       aciklama:    form.aciklama.trim() || undefined,
     };
-    const id = await addDepoHareketi(yeni);
+    const { id } = await apiAddDepo(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...BOSLUK, hareketTuru: p.hareketTuru }));
   }
 
   async function handleSil(id: string) {
-    await deleteDepoHareketi(id);
+    await apiDeleteDepo(id);
     setListe((p) => p.filter((x) => x.id !== id));
   }
 

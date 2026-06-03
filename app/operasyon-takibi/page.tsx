@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiAddOperasyon, apiGetIsEmirleri, apiGetOperasyonlar, apiUpdateOpBitis } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { Play, StopCircle, ClipboardList } from "lucide-react";
 import type { IsEmri, Operasyon } from "@/data/types";
-import { getIsEmirleri, getOperasyonlar, addOperasyon, updateOperasyonBitis } from "@/lib/db";
+
 
 function sureFmt(ms: number): string {
   const s = Math.floor(ms / 1000);
@@ -24,7 +26,7 @@ export default function OperasyonTakibiPage() {
   const [loading,       setLoading]       = useState(true);
 
   useEffect(() => {
-    Promise.all([getIsEmirleri(), getOperasyonlar()]).then(([isData, opData]) => {
+    Promise.all([apiGetIsEmirleri(), apiGetOperasyonlar()]).then(([isData, opData]) => {
       setIsEmriListesi(isData);
       setOperasyonlar(opData);
       setLoading(false);
@@ -46,7 +48,7 @@ export default function OperasyonTakibiPage() {
       makinaNo:  kayit.makinaNo || undefined,
       baslangic: new Date().toISOString(),
     };
-    const id = await addOperasyon(yeni);
+    const { id } = await apiAddOperasyon(yeni);
     setOperasyonlar((p) => [...p, { ...yeni, id }]);
   }
 
@@ -54,7 +56,7 @@ export default function OperasyonTakibiPage() {
     const aktif = operasyonlar.find((o) => o.isEmriId === isEmriId && !o.bitis);
     if (!aktif) return;
     const bitis = new Date().toISOString();
-    await updateOperasyonBitis(aktif.id, bitis);
+    await apiUpdateOpBitis(aktif.id, bitis);
     setOperasyonlar((p) =>
       p.map((o) => o.id === aktif.id ? { ...o, bitis } : o)
     );

@@ -3,17 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LogIn } from "lucide-react";
-import { loginKullanici } from "@/lib/db";
-import type { KullaniciRol } from "@/data/types";
+import { apiGiris } from "@/lib/api";
 
 const OTURUM_ANAHTARI = "uretim_oturum";
 const ROL_ANAHTARI    = "uretim_rol";
-
-// Hardcoded fallback — Supabase kullanicilar tablosu yokken çalışır
-const FALLBACK: { kullanici: string; sifre: string; rol: KullaniciRol }[] = [
-  { kullanici: "admin",    sifre: "1234", rol: "admin"    },
-  { kullanici: "operatör", sifre: "1234", rol: "operatör" },
-];
+const TOKEN_ANAHTARI  = "uretim_token";
 
 const HATIRLA_ANAHTARI = "uretim_hatirla";
 
@@ -35,26 +29,19 @@ export default function GirisPage() {
     setYukleniyor(true);
     setHata("");
 
-    // Önce Supabase'den kontrol et
-    let hesap = await loginKullanici(kullanici.trim(), sifre);
-
-    // Supabase'de bulunamazsa hardcoded fallback'e bak
-    if (!hesap) {
-      const fb = FALLBACK.find(h => h.kullanici === kullanici.trim() && h.sifre === sifre);
-      if (fb) hesap = { rol: fb.rol };
-    }
-
-    if (hesap) {
+    try {
+      const sonuc = await apiGiris(kullanici.trim(), sifre);
+      localStorage.setItem(TOKEN_ANAHTARI,  sonuc.token);
       localStorage.setItem(OTURUM_ANAHTARI, "aktif");
-      localStorage.setItem(ROL_ANAHTARI, hesap.rol);
-      localStorage.setItem("uretim_kullanici_adi", kullanici.trim());
+      localStorage.setItem(ROL_ANAHTARI,    sonuc.rol);
+      localStorage.setItem("uretim_kullanici_adi", sonuc.kullaniciAdi);
       if (beniHatirla) {
         localStorage.setItem(HATIRLA_ANAHTARI, JSON.stringify({ kullanici: kullanici.trim(), sifre }));
       } else {
         localStorage.removeItem(HATIRLA_ANAHTARI);
       }
       router.replace("/anasayfa");
-    } else {
+    } catch {
       setHata("Kullanıcı adı veya şifre hatalı.");
       setYukleniyor(false);
     }

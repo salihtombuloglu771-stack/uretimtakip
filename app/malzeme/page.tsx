@@ -1,5 +1,7 @@
 "use client";
 
+
+import { apiAddMalzeme, apiDeleteMalzeme, apiGetMalzemeler, apiUpdateFotograf } from "@/lib/api";
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
@@ -7,7 +9,7 @@ import { getRol } from "@/components/AuthGuard";
 import { Layers, PlusCircle, Trash2, Download, Upload, AlertCircle, Camera, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import type { Malzeme } from "@/data/types";
-import { getMalzemeler, addMalzeme, deleteMalzeme, updateMalzemeFotograf } from "@/lib/db";
+
 
 interface FormState {
   malzemeKodu: string; malzemeAdi: string; birim: string;
@@ -36,7 +38,7 @@ export default function MalzemePage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getMalzemeler().then((data) => { setListe(data); setLoading(false); });
+    apiGetMalzemeler().then((data) => { setListe(data); setLoading(false); });
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -63,7 +65,7 @@ export default function MalzemePage() {
       birimFiyat:  isNaN(fiyat) ? undefined : fiyat,
       fotograf:    formFotograf ?? undefined,
     };
-    const id = await addMalzeme(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
+    const { id } = await apiAddMalzeme(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
     setFormFotograf(null);
@@ -90,7 +92,7 @@ export default function MalzemePage() {
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result as string;
-      await updateMalzemeFotograf(satirKameraId, base64);
+      await apiUpdateFotograf(satirKameraId, base64);
       setListe((p) => p.map((m) => m.id === satirKameraId ? { ...m, fotograf: base64 } : m));
       setSatirKameraId(null);
     };
@@ -99,7 +101,7 @@ export default function MalzemePage() {
   }
 
   async function handleSil(id: string) {
-    await deleteMalzeme(id);
+    await apiDeleteMalzeme(id);
     setListe((p) => p.filter((m) => m.id !== id));
   }
 
@@ -150,7 +152,7 @@ export default function MalzemePage() {
         stokMiktari: isNaN(stok) ? 0 : stok,
         birimFiyat:  isNaN(fiyat) ? undefined : fiyat,
       };
-      const id = await addMalzeme(yeni, localStorage.getItem("uretim_kullanici_adi") ?? "");
+      const { id } = await apiAddMalzeme(yeni);
       setListe((p) => [...p, { ...yeni, id }]);
       eklenen++;
     }

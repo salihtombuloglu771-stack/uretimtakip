@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiGetDurus, apiGetIsEmirleri, apiGetMakinalar, apiGetOperasyonlar, apiGetUrunler } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { BarChart2 } from "lucide-react";
 import type { IsEmri, Durus, Operasyon } from "@/data/types";
-import { getIsEmirleri, getDuruslar, getOperasyonlar, getMakinalar, getUrunler } from "@/lib/db";
+
 
 function BarSatir({ etiket, deger, maks, renk }: { etiket: string; deger: number; maks: number; renk: string }) {
   const yuzde = maks > 0 ? Math.round((deger / maks) * 100) : 0;
@@ -30,11 +32,11 @@ export default function RaporlarPage() {
 
   useEffect(() => {
     Promise.all([
-      getIsEmirleri(),
-      getDuruslar(),
-      getOperasyonlar(),
-      getMakinalar(),
-      getUrunler(),
+      apiGetIsEmirleri(),
+      apiGetDurus(),
+      apiGetOperasyonlar(),
+      apiGetMakinalar(),
+      apiGetUrunler(),
     ]).then(([isData, durusData, opData, makinaData, urunData]) => {
       setIsEmirleri(isData);
       setDuruslar(durusData);

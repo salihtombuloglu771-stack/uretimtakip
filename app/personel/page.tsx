@@ -1,12 +1,14 @@
 "use client";
 
+
+import { apiAddPersonel, apiDeletePersonel, apiGetPersonel } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Users, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
 import type { Personel } from "@/data/types";
-import { getPersonel, addPersonel, deletePersonel } from "@/lib/db";
+
 
 interface FormState {
   sicilNo: string; adSoyad: string; departman: string;
@@ -27,7 +29,7 @@ export default function PersonelPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getPersonel().then((data) => {
+    apiGetPersonel().then((data) => {
       setListe(data);
       setLoading(false);
     });
@@ -56,13 +58,13 @@ export default function PersonelPage() {
       durum:          form.durum,
       iseGirisTarihi: form.iseGirisTarihi || undefined,
     };
-    const id = await addPersonel(yeni);
+    const { id } = await apiAddPersonel(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
   }
 
   async function handleSil(id: string) {
-    await deletePersonel(id);
+    await apiDeletePersonel(id);
     setListe((p) => p.filter((x) => x.id !== id));
   }
 

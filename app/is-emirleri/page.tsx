@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiDeleteIsEmri, apiGetIsEmirleri } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import StatsCards from "@/components/StatsCards";
 import IsEmriTablosu from "@/components/IsEmriTablosu";
 import AuthGuard from "@/components/AuthGuard";
-import { getIsEmirleri, deleteIsEmri } from "@/lib/db";
+
 import type { IsEmri } from "@/data/types";
 
 export default function IsEmirleriSayfasi() {
@@ -13,11 +15,11 @@ export default function IsEmirleriSayfasi() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getIsEmirleri().then((data) => { setIsEmriListesi(data); setLoading(false); });
+    apiGetIsEmirleri().then((data) => { setIsEmriListesi(data); setLoading(false); });
   }, []);
 
   async function handleSil(id: string) {
-    await deleteIsEmri(id);
+    await apiDeleteIsEmri(id);
     setIsEmriListesi((p) => p.filter((k) => k.id !== id));
   }
 

@@ -1,11 +1,13 @@
 "use client";
 
+
+import { apiAddDurus, apiDeleteDurus, apiGetDurus, apiGetMakinalar } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { PauseCircle, PlusCircle, Trash2 } from "lucide-react";
 import type { Durus, DurusNeden, Makina } from "@/data/types";
-import { getDuruslar, addDurus, deleteDurus, getMakinalar } from "@/lib/db";
+
 
 const NEDEN_ETIKET: Record<DurusNeden, string> = {
   ariza:    "🔴 Arıza",
@@ -30,7 +32,7 @@ export default function DurusKaydiPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getDuruslar(), getMakinalar()]).then(([durusData, makinaData]) => {
+    Promise.all([apiGetDurus(), apiGetMakinalar()]).then(([durusData, makinaData]) => {
       setListe(durusData);
       setMakinalar(makinaData);
       setLoading(false);
@@ -62,13 +64,13 @@ export default function DurusKaydiPage() {
       neden: form.neden,
       aciklama: form.aciklama,
     };
-    const id = await addDurus(yeni);
+    const { id } = await apiAddDurus(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...p, baslangicTarihi: simdikiZaman(), bitisTarihi: simdikiZaman(), aciklama: "" }));
   }
 
   async function handleSil(id: string) {
-    await deleteDurus(id);
+    await apiDeleteDurus(id);
     setListe((p) => p.filter((x) => x.id !== id));
   }
 

@@ -1,12 +1,14 @@
 "use client";
 
+
+import { apiAddDemirbas, apiDeleteDemirbas, apiGetDemirbaslar } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Building, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
 import type { DemirbasKayit } from "@/data/types";
-import { getDemirbaslar, addDemirbas, deleteDemirbas } from "@/lib/db";
+
 
 interface FormState {
   demirbasNo: string; demirbasAdi: string; konum: string;
@@ -27,7 +29,7 @@ export default function SabitKiymetPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getDemirbaslar().then((data) => {
+    apiGetDemirbaslar().then((data) => {
       setListe(data);
       setLoading(false);
     });
@@ -56,13 +58,13 @@ export default function SabitKiymetPage() {
       alisFiyati:  isNaN(fiyat) ? undefined : fiyat,
       durum:       form.durum,
     };
-    const id = await addDemirbas(yeni);
+    const { id } = await apiAddDemirbas(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
   }
 
   async function handleSil(id: string) {
-    await deleteDemirbas(id);
+    await apiDeleteDemirbas(id);
     setListe((p) => p.filter((d) => d.id !== id));
   }
 

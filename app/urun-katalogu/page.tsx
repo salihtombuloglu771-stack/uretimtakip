@@ -1,12 +1,14 @@
 "use client";
 
+
+import { apiAddUrun, apiDeleteUrun, apiGetUrunler } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { BookOpen, PlusCircle, Trash2 } from "lucide-react";
 import type { Urun } from "@/data/types";
-import { getUrunler, addUrun, deleteUrun } from "@/lib/db";
+
 
 export default function UrunKataloguPage() {
   const [liste,   setListe]   = useState<Urun[]>([]);
@@ -17,7 +19,7 @@ export default function UrunKataloguPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    getUrunler().then((data) => {
+    apiGetUrunler().then((data) => {
       setListe(data);
       setLoading(false);
     });
@@ -45,13 +47,13 @@ export default function UrunKataloguPage() {
       urunAdi:    form.urunAdi.trim(),
       birimFiyat: isNaN(fiyat) ? 0 : fiyat,
     };
-    const id = await addUrun(yeni);
+    const { id } = await apiAddUrun(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm({ urunKodu: "", urunAdi: "", birimFiyat: "" });
   }
 
   async function handleSil(id: string) {
-    await deleteUrun(id);
+    await apiDeleteUrun(id);
     setListe((p) => p.filter((u) => u.id !== id));
   }
 

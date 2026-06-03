@@ -1,5 +1,7 @@
 "use client";
 
+
+import { apiGetDepo, apiGetIsEmirleri, apiGetKalite, apiGetMalzemeler } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard, { getRol } from "@/components/AuthGuard";
@@ -7,7 +9,7 @@ import {
   FilePlus, Layers, ShieldCheck, Archive,
   Home, User, Clock, RefreshCw, AlertCircle,
 } from "lucide-react";
-import { getIsEmirleri, getMalzemeler, getKaliteKontroller, getDepoHareketleri } from "@/lib/db";
+
 
 interface Kayit {
   id:         string;
@@ -43,10 +45,10 @@ export default function AnasayfaPage() {
     setHata("");
     try {
       const [isEmirleri, malzemeler, kaliteler, depoList] = await Promise.all([
-        getIsEmirleri().catch(() => []),
-        getMalzemeler().catch(() => []),
-        getKaliteKontroller().catch(() => []),
-        getDepoHareketleri().catch(() => []),
+        apiGetIsEmirleri().catch(() => []),
+        apiGetMalzemeler().catch(() => []),
+        apiGetKalite().catch(() => []),
+        apiGetDepo().catch(() => []),
       ]);
 
       setSayilar({ ie: isEmirleri.length, mlz: malzemeler.length, kk: kaliteler.length, depo: depoList.length });
