@@ -20,12 +20,12 @@ const HATIRLA_ANAHTARI = "uretim_hatirla";
 export default function GirisPage() {
   const router = useRouter();
   const [kullanici,   setKullanici]   = useState(() => {
-    try { return JSON.parse(localStorage.getItem(HATIRLA_ANAHTARI) ?? "{}").kullanici ?? ""; } catch { return ""; }
+    try { return JSON.parse((typeof window !== "undefined" ? localStorage : null)?.getItem(HATIRLA_ANAHTARI) ?? "{}").kullanici ?? ""; } catch { return ""; }
   });
   const [sifre,       setSifre]       = useState(() => {
-    try { return JSON.parse(localStorage.getItem(HATIRLA_ANAHTARI) ?? "{}").sifre ?? ""; } catch { return ""; }
+    try { return JSON.parse((typeof window !== "undefined" ? localStorage : null)?.getItem(HATIRLA_ANAHTARI) ?? "{}").sifre ?? ""; } catch { return ""; }
   });
-  const [beniHatirla, setBeniHatirla] = useState(() => !!localStorage.getItem(HATIRLA_ANAHTARI));
+  const [beniHatirla, setBeniHatirla] = useState(() => typeof window !== "undefined" && !!localStorage.getItem(HATIRLA_ANAHTARI));
   const [sifreGoster, setSifreGoster] = useState(false);
   const [hata,        setHata]        = useState("");
   const [yukleniyor,  setYukleniyor]  = useState(false);
