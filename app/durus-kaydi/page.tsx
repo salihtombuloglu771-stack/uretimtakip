@@ -3,6 +3,8 @@
 
 import { apiAddDurus, apiDeleteDurus, apiGetDurus, apiGetMakinalar } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
 import { PauseCircle, PlusCircle, Trash2 } from "lucide-react";
 import type { Durus, DurusNeden, Makina } from "@/data/types";
@@ -22,6 +24,8 @@ const simdikiZaman = () => {
 };
 
 export default function DurusKaydiPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,     setListe]    = useState<Durus[]>([]);
   const [makinalar, setMakinalar] = useState<Makina[]>([]);
   const [form,      setForm]     = useState<{ makinaNo: string; baslangicTarihi: string; bitisTarihi: string; neden: DurusNeden; aciklama: string }>({
@@ -66,11 +70,17 @@ export default function DurusKaydiPage() {
     const { id } = await apiAddDurus(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm((p) => ({ ...p, baslangicTarihi: simdikiZaman(), bitisTarihi: simdikiZaman(), aciklama: "" }));
+    toast("Duruş kaydı eklendi.", "basari");
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteDurus(id);
-    setListe((p) => p.filter((x) => x.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteDurus(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Duruş kaydı silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   const toplamDk = liste.reduce((t, d) => t + sureDk(d.baslangicTarihi, d.bitisTarihi), 0);
@@ -202,7 +212,7 @@ export default function DurusKaydiPage() {
                         </td>
                         <td className="px-4 py-3 text-slate-500 text-xs">{d.aciklama || "—"}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => handleSil(d.id)}
+                          <button onClick={() => setSilId(d.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -215,6 +225,12 @@ export default function DurusKaydiPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
     </PageLayout>
   );
 }

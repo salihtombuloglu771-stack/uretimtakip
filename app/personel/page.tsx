@@ -3,6 +3,8 @@
 
 import { apiAddPersonel, apiDeletePersonel, apiGetPersonel } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { Users, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
@@ -20,6 +22,8 @@ const BOSLUK: FormState = {
 };
 
 export default function PersonelPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,   setListe]   = useState<Personel[]>([]);
   const [form,    setForm]    = useState<FormState>(BOSLUK);
   const [hata,    setHata]    = useState("");
@@ -60,11 +64,17 @@ export default function PersonelPage() {
     const { id } = await apiAddPersonel(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
+    toast("Personel eklendi.", "basari");
   }
 
-  async function handleSil(id: string) {
-    await apiDeletePersonel(id);
-    setListe((p) => p.filter((x) => x.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeletePersonel(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Personel kaydı silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   const aktifSayi    = liste.filter((p) => p.durum === "aktif").length;
@@ -192,7 +202,7 @@ export default function PersonelPage() {
                       </td>
                       {isAdmin && (
                         <td className="px-5 py-3.5">
-                          <button onClick={() => handleSil(p.id)}
+                          <button onClick={() => setSilId(p.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -205,6 +215,12 @@ export default function PersonelPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
 
     </PageLayout>
   );

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { apiGetFaturalar, apiAddFatura, apiUpdateFaturaDurum, apiDeleteFatura } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import type { Fatura, FaturaKalem, FaturaTip, KdvOrani } from "@/data/types";
 import { FileText, PlusCircle, Trash2, Printer, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 
@@ -34,6 +36,8 @@ const DURUM_RENGI = {
 };
 
 export default function FaturaPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,     setListe]     = useState<Fatura[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [formAcik,  setFormAcik]  = useState(false);
@@ -86,10 +90,15 @@ export default function FaturaPage() {
     setListe(p => p.map(x => x.id === f.id ? { ...x, durum } : x));
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteFatura(id);
-    setListe(p => p.filter(x => x.id !== id));
-    if (detayId === id) setDetayId(null);
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteFatura(silId);
+      setListe(p => p.filter(x => x.id !== silId));
+      if (detayId === silId) setDetayId(null);
+      toast("Fatura silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   function handleYazdir(f: Fatura) {
@@ -307,7 +316,7 @@ export default function FaturaPage() {
                             className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
                             <Printer size={14}/>
                           </button>
-                          <button onClick={()=>handleSil(f.id)} title="Sil"
+                          <button onClick={e=>{e.stopPropagation();setSilId(f.id);}} title="Sil"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14}/>
                           </button>
@@ -357,6 +366,7 @@ export default function FaturaPage() {
         )}
 
       <div ref={printRef}/>
+      <ConfirmModal acik={silId !== null} mesaj="Bu faturayı silmek istiyor musunuz?" onOnayla={handleSil} onIptal={() => setSilId(null)} />
     </PageLayout>
   );
 }

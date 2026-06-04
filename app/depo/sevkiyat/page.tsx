@@ -3,6 +3,8 @@
 
 import { apiAddDepo, apiDeleteDepo, apiGetDepo } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect, useCallback } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { Truck, PlusCircle, Trash2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -20,6 +22,8 @@ const BOSLUK: FormState = {
 };
 
 export default function SevkiyatDepoPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,   setListe]   = useState<DepoHareketi[]>([]);
   const [form,    setForm]    = useState<FormState>(BOSLUK);
   const [hata,    setHata]    = useState("");
@@ -64,9 +68,14 @@ export default function SevkiyatDepoPage() {
     setForm((p) => ({ ...BOSLUK, hareketTuru: p.hareketTuru }));
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteDepo(id);
-    setListe((p) => p.filter((x) => x.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteDepo(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Hareket silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   const toplamGiris = liste.filter((h) => h.hareketTuru === "giris").reduce((t, h) => t + h.miktar, 0);
@@ -190,7 +199,7 @@ export default function SevkiyatDepoPage() {
                       <td className="px-4 py-3 text-slate-500 text-xs">{h.aciklama || "—"}</td>
                       {isAdmin && (
                         <td className="px-4 py-3">
-                          <button onClick={() => handleSil(h.id)}
+                          <button onClick={() => setSilId(h.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -203,6 +212,12 @@ export default function SevkiyatDepoPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
 
     </PageLayout>
   );

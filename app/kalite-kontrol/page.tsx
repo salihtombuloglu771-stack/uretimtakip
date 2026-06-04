@@ -3,6 +3,8 @@
 
 import { apiAddKalite, apiDeleteKalite, apiGetIsEmirleri, apiGetKalite } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect, useRef } from "react";
 import { ShieldCheck, PlusCircle, Trash2, CheckCircle, XCircle, Camera, X } from "lucide-react";
 import type { KaliteKontrol, IsEmri } from "@/data/types";
@@ -21,6 +23,8 @@ const BOSLUK: FormState = {
 };
 
 export default function KaliteKontrolPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,      setListe]      = useState<KaliteKontrol[]>([]);
   const [isEmirleri, setIsEmirleri] = useState<IsEmri[]>([]);
   const [form,       setForm]       = useState<FormState>(BOSLUK);
@@ -82,9 +86,14 @@ export default function KaliteKontrolPage() {
     setForm((p) => ({ ...BOSLUK, kontrolEden: p.kontrolEden }));
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteKalite(id);
-    setListe((p) => p.filter((x) => x.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteKalite(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Kalite kaydı silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   const gecenSayi    = liste.filter((k) => k.sonuc === "gecti").length;
@@ -290,7 +299,7 @@ export default function KaliteKontrolPage() {
                         </td>
                         <td className="px-4 py-3 text-slate-500 text-xs">{k.aciklama || "—"}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => handleSil(k.id)}
+                          <button onClick={() => setSilId(k.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -303,6 +312,12 @@ export default function KaliteKontrolPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
 
     </PageLayout>
   );

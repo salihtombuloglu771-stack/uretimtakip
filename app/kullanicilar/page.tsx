@@ -3,6 +3,8 @@
 
 import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar, apiUpdateKullaniciRol } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { Shield, PlusCircle, Trash2, Eye, EyeOff } from "lucide-react";
@@ -19,6 +21,8 @@ interface FormState {
 const BOSLUK: FormState = { kullaniciAdi: "", sifre: "", rol: "operatör" };
 
 export default function KullanicilarPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,       setListe]       = useState<Kullanici[]>([]);
   const [form,        setForm]        = useState<FormState>(BOSLUK);
   const [hata,        setHata]        = useState("");
@@ -71,10 +75,16 @@ export default function KullanicilarPage() {
     setListe((p) => p.map((k) => k.id === kullanici.id ? { ...k, rol: yeniRol } : k));
   }
 
-  async function handleSil(kullanici: Kullanici) {
-    if (kullanici.kullaniciAdi === mevcutKul) return;
-    await apiDeleteKullanici(kullanici.id);
-    setListe((p) => p.filter((k) => k.id !== kullanici.id));
+  async function handleSil() {
+    if (!silId) return;
+    const k = liste.find(x => x.id === silId);
+    if (k?.kullaniciAdi === mevcutKul) { setSilId(null); return; }
+    try {
+      await apiDeleteKullanici(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Kullanıcı silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   if (!isAdmin) {
@@ -222,7 +232,7 @@ export default function KullanicilarPage() {
                       <td className="px-5 py-3.5 text-slate-400 text-xs">••••••</td>
                       <td className="px-5 py-3.5">
                         {k.kullaniciAdi !== mevcutKul && (
-                          <button onClick={() => handleSil(k)}
+                          <button onClick={() => setSilId(k.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                             title="Kullanıcıyı sil">
                             <Trash2 size={14} />
@@ -244,6 +254,7 @@ export default function KullanicilarPage() {
             oluşturulmuş olması gerekir. Tablo yoksa giriş hardcoded hesaplarla (admin/1234) çalışmaya devam eder.
           </p>
         </div>
+      <ConfirmModal acik={silId !== null} mesaj="Bu kullanıcıyı silmek istiyor musunuz?" onOnayla={handleSil} onIptal={() => setSilId(null)} />
 
     </PageLayout>
   );

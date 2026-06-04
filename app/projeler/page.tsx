@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import {
   apiGetProjeler, apiAddProje, apiUpdateProjeDurum, apiDeleteProje,
   apiGetGorevler, apiAddGorev, apiUpdateGorevDurum, apiDeleteGorev,
@@ -38,6 +40,8 @@ const BOSLUK: FormState = {
 };
 
 export default function ProjelerPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,    setListe]    = useState<ProjeExt[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [formAcik, setFormAcik] = useState(false);
@@ -76,10 +80,15 @@ export default function ProjelerPage() {
     setForm(BOSLUK); setFormAcik(false);
   }
 
-  async function handleProjeSil(id: string) {
-    await apiDeleteProje(id);
-    setListe(p => p.filter(x => x.id !== id));
-    if (acikId === id) setAcikId(null);
+  async function handleProjeSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteProje(silId);
+      setListe(p => p.filter(x => x.id !== silId));
+      if (acikId === silId) setAcikId(null);
+      toast("Proje silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   async function handleProjeDurum(proje: ProjeExt, durum: ProjeDurum) {
@@ -260,7 +269,7 @@ export default function ProjelerPage() {
                           <option key={v} value={v}>{l}</option>
                         ))}
                       </select>
-                      <button onClick={e=>{e.stopPropagation();handleProjeSil(proje.id);}}
+                      <button onClick={e=>{e.stopPropagation();setSilId(proje.id);}}
                         className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors">
                         <Trash2 size={14}/>
                       </button>
@@ -316,6 +325,7 @@ export default function ProjelerPage() {
             })}
           </div>
         )}
+      <ConfirmModal acik={silId !== null} mesaj="Bu projeyi ve tüm görevlerini silmek istiyor musunuz?" onOnayla={handleProjeSil} onIptal={() => setSilId(null)} />
 
     </PageLayout>
   );

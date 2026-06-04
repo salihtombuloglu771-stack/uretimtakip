@@ -3,6 +3,8 @@
 
 import { apiGetKullanicilar } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect, useRef } from "react";
 import { MessageSquare, Send, Trash2, CheckCheck, Inbox, SendHorizonal } from "lucide-react";
 import { getMesajlar, addMesaj, markOkundu, deleteMesaj } from "@/lib/mesajlar";
@@ -12,6 +14,8 @@ import type { Mesaj } from "@/data/types";
 const FALLBACK_KULLANICILAR = ["admin", "operatör"];
 
 export default function MesajlarPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [mesajlar,    setMesajlar]    = useState<Mesaj[]>([]);
   const [kullanicilar, setKullanicilar] = useState<string[]>([]);
   const [benimAdi,    setBenimAdi]    = useState("");
@@ -54,9 +58,13 @@ export default function MesajlarPage() {
     }
   }
 
-  function sil(id: string) {
-    deleteMesaj(id).then(yenile);
-    if (secili?.id === id) setSecili(null);
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await deleteMesaj(silId);
+      await yenile();
+      if (secili?.id === silId) setSecili(null);
+    } finally { setSilId(null); }
   }
 
   const gelen = mesajlar.filter((m) => m.alici === benimAdi);
@@ -215,7 +223,7 @@ export default function MesajlarPage() {
                       </span>
                     )}
                     <button
-                      onClick={() => sil(secili.id)}
+                      onClick={() => setSilId(secili.id)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 size={15} />
@@ -264,6 +272,7 @@ export default function MesajlarPage() {
           </div>
 
         </div>
+      <ConfirmModal acik={silId !== null} mesaj="Bu mesajı silmek istiyor musunuz?" onOnayla={handleSil} onIptal={() => setSilId(null)} />
     </PageLayout>
   );
 }

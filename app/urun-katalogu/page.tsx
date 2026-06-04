@@ -3,6 +3,8 @@
 
 import { apiAddUrun, apiDeleteUrun, apiGetUrunler } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { BookOpen, PlusCircle, Trash2 } from "lucide-react";
@@ -10,6 +12,8 @@ import type { Urun } from "@/data/types";
 
 
 export default function UrunKataloguPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,   setListe]   = useState<Urun[]>([]);
   const [form,    setForm]    = useState<{ urunKodu: string; urunAdi: string; birimFiyat: string }>({ urunKodu: "", urunAdi: "", birimFiyat: "" });
   const [hata,    setHata]    = useState("");
@@ -51,9 +55,14 @@ export default function UrunKataloguPage() {
     setForm({ urunKodu: "", urunAdi: "", birimFiyat: "" });
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteUrun(id);
-    setListe((p) => p.filter((u) => u.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteUrun(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Ürün silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   
@@ -140,7 +149,7 @@ export default function UrunKataloguPage() {
                       </td>
                       {isAdmin && (
                         <td className="px-5 py-3.5">
-                          <button onClick={() => handleSil(urun.id)}
+                          <button onClick={() => setSilId(urun.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -153,6 +162,12 @@ export default function UrunKataloguPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
     </PageLayout>
   );
 }

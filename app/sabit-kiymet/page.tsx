@@ -3,6 +3,8 @@
 
 import { apiAddDemirbas, apiDeleteDemirbas, apiGetDemirbaslar } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { Building, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
@@ -20,6 +22,8 @@ const BOSLUK: FormState = {
 };
 
 export default function SabitKiymetPage() {
+  const { toast } = useToast();
+  const [silId, setSilId] = useState<string | null>(null);
   const [liste,   setListe]   = useState<DemirbasKayit[]>([]);
   const [form,    setForm]    = useState<FormState>(BOSLUK);
   const [hata,    setHata]    = useState("");
@@ -60,11 +64,17 @@ export default function SabitKiymetPage() {
     const { id } = await apiAddDemirbas(yeni);
     setListe((p) => [...p, { ...yeni, id }]);
     setForm(BOSLUK);
+    toast("Demirbaş eklendi.", "basari");
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteDemirbas(id);
-    setListe((p) => p.filter((d) => d.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteDemirbas(silId);
+      setListe((p) => p.filter((x) => x.id !== silId));
+      toast("Demirbaş silindi.", "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   const aktifSayi   = liste.filter((d) => d.durum === "aktif").length;
@@ -195,7 +205,7 @@ export default function SabitKiymetPage() {
                       </td>
                       {isAdmin && (
                         <td className="px-5 py-3.5">
-                          <button onClick={() => handleSil(d.id)}
+                          <button onClick={() => setSilId(d.id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 size={14} />
                           </button>
@@ -208,6 +218,12 @@ export default function SabitKiymetPage() {
             </div>
           </div>
         )}
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu kaydı silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
 
     </PageLayout>
   );
