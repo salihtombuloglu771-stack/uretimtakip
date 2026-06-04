@@ -1,6 +1,7 @@
 // Backend API istemcisi — tüm veri işlemleri buradan yapılır
 
-const BASE = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/$/, "");
+const _url = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const BASE = (_url.charCodeAt(0) === 0xFEFF ? _url.slice(1) : _url).replace(/\/$/, "");
 
 function token(): string {
   if (typeof window === "undefined") return "";
@@ -28,6 +29,8 @@ export const apiGiris = (kullaniciAdi: string, sifre: string) =>
   istek<{ token: string; kullaniciAdi: string; rol: string }>(
     "/api/auth/giris", "POST", { kullaniciAdi, sifre }
   );
+export const apiSifreDegistir = (kullaniciAdi: string, eskiSifre: string, yeniSifre: string) =>
+  istek<void>("/api/auth/sifre-degistir", "POST", { kullaniciAdi, eskiSifre, yeniSifre });
 
 // ── Veri dönüşüm yardımcıları (SQLite snake_case → camelCase) ─────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -187,8 +190,32 @@ export const apiGetKullanicilar = () =>
   istek<unknown[]>("/api/kullanicilar").then(d => d.map(mapKullanici));
 export const apiAddKullanici = (v: unknown) =>
   istek<{ id: string }>("/api/kullanicilar", "POST", v);
+export const apiUpdateKullaniciRol = (id: string, rol: string) =>
+  istek<void>(`/api/kullanicilar/${id}/rol`, "PATCH", { rol });
 export const apiDeleteKullanici = (id: string) =>
   istek<void>(`/api/kullanicilar/${id}`, "DELETE");
+
+// ── Faturalar ────────────────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapFatura = (r: any) => r; // backend already returns camelCase
+export const apiGetFaturalar   = () => istek<unknown[]>("/api/faturalar").then(d => d.map(mapFatura));
+export const apiAddFatura      = (v: unknown) => istek<{ id: string }>("/api/faturalar", "POST", v);
+export const apiUpdateFaturaDurum = (id: string, durum: string) => istek<void>(`/api/faturalar/${id}/durum`, "PATCH", { durum });
+export const apiDeleteFatura   = (id: string) => istek<void>(`/api/faturalar/${id}`, "DELETE");
+
+// ── Projeler ─────────────────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapProje = (r: any) => r;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapGorev = (r: any) => r;
+export const apiGetProjeler    = () => istek<unknown[]>("/api/projeler").then(d => d.map(mapProje));
+export const apiAddProje       = (v: unknown) => istek<{ id: string }>("/api/projeler", "POST", v);
+export const apiUpdateProjeDurum = (id: string, durum: string) => istek<void>(`/api/projeler/${id}/durum`, "PATCH", { durum });
+export const apiDeleteProje    = (id: string) => istek<void>(`/api/projeler/${id}`, "DELETE");
+export const apiGetGorevler    = (projeId: string) => istek<unknown[]>(`/api/projeler/${projeId}/gorevler`).then(d => d.map(mapGorev));
+export const apiAddGorev       = (projeId: string, v: unknown) => istek<{ id: string }>(`/api/projeler/${projeId}/gorevler`, "POST", v);
+export const apiUpdateGorevDurum = (id: string, durum: string) => istek<void>(`/api/projeler/gorevler/${id}/durum`, "PATCH", { durum });
+export const apiDeleteGorev    = (id: string) => istek<void>(`/api/projeler/gorevler/${id}`, "DELETE");
 
 // ── Mesajlar ─────────────────────────────────────────────────────────────────
 export const apiGetMesajlar = () =>

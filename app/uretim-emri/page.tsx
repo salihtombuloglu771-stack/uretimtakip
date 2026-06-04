@@ -30,7 +30,7 @@ export default function UretimEmriPage() {
     <AuthGuard>
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
-      <main className="flex-1 ml-60 p-6 space-y-6">
+      <main className="flex-1 md:ml-60 p-6 space-y-6">
 
         <div className="flex items-center justify-between">
           <div>

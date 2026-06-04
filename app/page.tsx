@@ -190,6 +190,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── FİYATLANDIRMA ── */}
+      <section id="fiyat" className="py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Şeffaf Fiyatlandırma</h2>
+            <p className="text-slate-500 text-lg">Gizli ücret yok. İstediğin zaman iptal et.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                ad: "Başlangıç", fiyat: "999", donem: "ay",
+                aciklama: "Küçük işletmeler için",
+                ozellikler: ["5 kullanıcıya kadar", "İş Emri & Makina Takibi", "Kalite Kontrol", "Malzeme Yönetimi", "E-posta destek"],
+                renk: "border-slate-200", butonRenk: "bg-slate-800 hover:bg-slate-700", populer: false,
+              },
+              {
+                ad: "Pro", fiyat: "2.499", donem: "ay",
+                aciklama: "Büyüyen işletmeler için",
+                ozellikler: ["20 kullanıcıya kadar", "Tüm Başlangıç özellikleri", "Depo & Sevkiyat Takibi", "Raporlar & Excel", "Operasyon Takibi", "Öncelikli destek"],
+                renk: "border-blue-500 shadow-xl shadow-blue-100", butonRenk: "bg-blue-600 hover:bg-blue-700", populer: true,
+              },
+              {
+                ad: "Kurumsal", fiyat: "4.999", donem: "ay",
+                aciklama: "Büyük fabrikalar için",
+                ozellikler: ["Sınırsız kullanıcı", "Tüm Pro özellikleri", "Özel modül geliştirme", "API entegrasyonu", "7/24 telefon destek", "Yerinde kurulum"],
+                renk: "border-slate-200", butonRenk: "bg-slate-800 hover:bg-slate-700", populer: false,
+              },
+            ].map((paket) => (
+              <div key={paket.ad} className={`relative rounded-2xl border-2 p-7 flex flex-col ${paket.renk}`}>
+                {paket.populer && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
+                    EN POPÜLER
+                  </div>
+                )}
+                <p className="text-slate-500 text-sm font-medium mb-1">{paket.aciklama}</p>
+                <h3 className="text-slate-800 text-2xl font-bold mb-1">{paket.ad}</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  <span className="text-4xl font-bold text-slate-900">₺{paket.fiyat}</span>
+                  <span className="text-slate-400 mb-1">/{paket.donem}</span>
+                </div>
+                <ul className="space-y-2.5 flex-1 mb-7">
+                  {paket.ozellikler.map(o => (
+                    <li key={o} className="flex items-center gap-2.5 text-sm text-slate-600">
+                      <CheckCircle size={15} className="text-emerald-500 flex-shrink-0" />
+                      {o}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={`/odeme?paket=${paket.ad.toLowerCase()}&fiyat=${paket.fiyat.replace(".", "")}`}
+                  className={`w-full text-center text-white font-semibold py-3 rounded-xl transition-colors ${paket.butonRenk}`}>
+                  Hemen Başla
+                </Link>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-slate-400 text-sm mt-8">
+            KDV dahil · 30 gün para iade garantisi · İstediğin zaman iptal
+          </p>
+        </div>
+      </section>
+
       {/* ── DEMO FORMU ── */}
       <section id="demo" className="py-20 px-6 bg-blue-600">
         <div className="max-w-2xl mx-auto">

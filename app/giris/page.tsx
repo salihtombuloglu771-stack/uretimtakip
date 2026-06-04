@@ -41,8 +41,13 @@ export default function GirisPage() {
         localStorage.removeItem(HATIRLA_ANAHTARI);
       }
       router.replace("/anasayfa");
-    } catch {
-      setHata("Kullanıcı adı veya şifre hatalı.");
+    } catch (err: unknown) {
+      const mesaj = err instanceof Error ? err.message : "";
+      if (mesaj.includes("fetch") || mesaj.includes("network") || mesaj.includes("Failed") || mesaj.includes("NetworkError")) {
+        setHata("Sunucuya bağlanılamadı. Backend çalışıyor mu? (backend-basla.ps1)");
+      } else {
+        setHata("Kullanıcı adı veya şifre hatalı.");
+      }
       setYukleniyor(false);
     }
   }

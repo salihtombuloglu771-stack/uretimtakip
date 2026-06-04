@@ -1,13 +1,14 @@
 "use client";
 
 
-import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar } from "@/lib/api";
+import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar, apiUpdateKullaniciRol } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AuthGuard, { getRol } from "@/components/AuthGuard";
 import { Shield, PlusCircle, Trash2, Eye, EyeOff } from "lucide-react";
 
 import type { Kullanici, KullaniciRol } from "@/data/types";
+import { ROL_ETIKETI, ROL_RENGI } from "@/lib/izinler";
 
 interface FormState {
   kullaniciAdi: string;
@@ -65,8 +66,13 @@ export default function KullanicilarPage() {
     }
   }
 
+  async function handleRolDegistir(kullanici: Kullanici, yeniRol: KullaniciRol) {
+    await apiUpdateKullaniciRol(kullanici.id, yeniRol);
+    setListe((p) => p.map((k) => k.id === kullanici.id ? { ...k, rol: yeniRol } : k));
+  }
+
   async function handleSil(kullanici: Kullanici) {
-    if (kullanici.kullaniciAdi === mevcutKul) return; // kendini silemesin
+    if (kullanici.kullaniciAdi === mevcutKul) return;
     await apiDeleteKullanici(kullanici.id);
     setListe((p) => p.filter((k) => k.id !== kullanici.id));
   }
@@ -76,7 +82,7 @@ export default function KullanicilarPage() {
       <AuthGuard>
         <div className="flex min-h-screen bg-slate-100">
           <Sidebar />
-          <main className="flex-1 ml-60 p-6 flex items-center justify-center">
+          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
             <div className="text-center">
               <Shield size={48} className="text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500 text-sm">Bu sayfaya erişim yetkiniz yok.</p>
@@ -91,7 +97,7 @@ export default function KullanicilarPage() {
     <AuthGuard>
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
-      <main className="flex-1 ml-60 p-6 space-y-6">
+      <main className="flex-1 md:ml-60 p-6 space-y-6">
 
         <div className="flex items-center justify-between">
           <div>
@@ -156,8 +162,12 @@ export default function KullanicilarPage() {
                 <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Rol</label>
                 <select name="rol" value={form.rol} onChange={handleChange}
                   className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                  <option value="operatör">Operatör — Kayıt ekleyebilir</option>
-                  <option value="admin">Admin — Tam yetki</option>
+                  <option value="operatör">Operatör</option>
+                  <option value="üretim_sorumlusu">Üretim Sorumlusu</option>
+                  <option value="kalite_sorumlusu">Kalite Sorumlusu</option>
+                  <option value="depo_sorumlusu">Depo Sorumlusu</option>
+                  <option value="proje_sorumlusu">Proje Sorumlusu</option>
+                  <option value="admin">Admin — Tam Yetki</option>
                 </select>
               </div>
             </div>
@@ -207,13 +217,24 @@ export default function KullanicilarPage() {
                         )}
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          k.rol === "admin"
-                            ? "text-violet-600 bg-violet-100"
-                            : "text-emerald-600 bg-emerald-100"
-                        }`}>
-                          {k.rol === "admin" ? "Admin" : "Operatör"}
-                        </span>
+                        {k.kullaniciAdi === mevcutKul ? (
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROL_RENGI[k.rol]}`}>
+                            {ROL_ETIKETI[k.rol]}
+                          </span>
+                        ) : (
+                          <select
+                            value={k.rol}
+                            onChange={(e) => handleRolDegistir(k, e.target.value as KullaniciRol)}
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-200 ${ROL_RENGI[k.rol]}`}
+                          >
+                            <option value="operatör">Operatör</option>
+                            <option value="üretim_sorumlusu">Üretim Sorumlusu</option>
+                            <option value="kalite_sorumlusu">Kalite Sorumlusu</option>
+                            <option value="depo_sorumlusu">Depo Sorumlusu</option>
+                            <option value="proje_sorumlusu">Proje Sorumlusu</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        )}
                       </td>
                       <td className="px-5 py-3.5 text-slate-400 text-xs">••••••</td>
                       <td className="px-5 py-3.5">

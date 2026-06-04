@@ -48,7 +48,13 @@ export interface Durus {
 export type YeniDurus = Omit<Durus, "id">;
 
 // ─── Kullanıcı Rolü ──────────────────────────────────────────────────────────
-export type KullaniciRol = "admin" | "operatör";
+export type KullaniciRol =
+  | "admin"
+  | "operatör"
+  | "üretim_sorumlusu"
+  | "kalite_sorumlusu"
+  | "depo_sorumlusu"
+  | "proje_sorumlusu";
 
 // ─── Operasyon Takibi ─────────────────────────────────────────────────────────
 export interface Operasyon {
@@ -117,6 +123,62 @@ export interface Kullanici {
   id: string;
   kullaniciAdi: string;
   rol: KullaniciRol;
+}
+
+// ─── Fatura / İrsaliye ───────────────────────────────────────────────────────
+export type FaturaTip    = "fatura" | "irsaliye";
+export type FaturaDurum  = "taslak" | "kesildi" | "iptal";
+export type KdvOrani     = 0 | 10 | 20;
+
+export interface FaturaKalem {
+  urunAdi:    string;
+  miktar:     number;
+  birim:      string;
+  birimFiyat: number;
+  kdvOrani:   KdvOrani;
+}
+
+export interface Fatura {
+  id:           string;
+  faturaNo:     string;
+  tip:          FaturaTip;
+  tarih:        string;
+  musteriAdi:   string;
+  musteriAdres?: string;
+  kalemler:     FaturaKalem[];
+  araToplam:    number;
+  kdvToplam:    number;
+  genelToplam:  number;
+  durum:        FaturaDurum;
+  notlar?:      string;
+  olusturan?:   string;
+}
+
+// ─── Proje Yönetim ───────────────────────────────────────────────────────────
+export type ProjeDurum = "planlama" | "aktif" | "tamamlandi" | "iptal";
+export type GorevDurum = "bekliyor" | "devam_ediyor" | "tamamlandi";
+
+export interface Proje {
+  id:              string;
+  projeKodu:       string;
+  projeAdi:        string;
+  musteri?:        string;
+  baslangicTarihi?: string;
+  bitisTarihi?:    string;
+  sorumlu?:        string;
+  durum:           ProjeDurum;
+  aciklama?:       string;
+  butce?:          number;
+  olusturan?:      string;
+}
+
+export interface ProjeGorev {
+  id:           string;
+  projeId:      string;
+  gorevAdi:     string;
+  atanan?:      string;
+  bitisTarihi?: string;
+  durum:        GorevDurum;
 }
 
 // ─── Mesajlaşma ───────────────────────────────────────────────────────────────

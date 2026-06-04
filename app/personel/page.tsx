@@ -81,7 +81,7 @@ export default function PersonelPage() {
       <AuthGuard>
         <div className="flex min-h-screen bg-slate-100">
           <Sidebar />
-          <main className="flex-1 ml-60 p-6 flex items-center justify-center">
+          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
             <p className="text-slate-500 text-sm">Yükleniyor…</p>
           </main>
         </div>
@@ -93,7 +93,7 @@ export default function PersonelPage() {
     <AuthGuard>
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
-      <main className="flex-1 ml-60 p-6 space-y-6">
+      <main className="flex-1 md:ml-60 p-6 space-y-6">
 
         <div className="flex items-center justify-between">
           <div>
@@ -121,8 +121,6 @@ export default function PersonelPage() {
           </div>
         </div>
 
-        {/* Form — sadece admin */}
-        {isAdmin && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
             <h2 className="text-slate-800 font-semibold text-base mb-5 flex items-center gap-2">
               <PlusCircle size={18} className="text-blue-500" /> Yeni Personel Ekle
@@ -172,7 +170,6 @@ export default function PersonelPage() {
               </div>
             </form>
           </div>
-        )}
 
         {/* Liste */}
         {liste.length === 0 ? (
