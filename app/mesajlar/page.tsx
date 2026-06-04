@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiGetKullanicilar } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { MessageSquare, Send, Trash2, CheckCheck, Inbox, SendHorizonal } from "lucide-react";
 import { getMesajlar, addMesaj, markOkundu, deleteMesaj } from "@/lib/mesajlar";
 
@@ -76,19 +75,7 @@ export default function MesajlarPage() {
   }
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold flex items-center gap-2">
-              <MessageSquare size={22} className="text-blue-500" /> Mesajlar
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Kullanıcılar arası iç mesajlaşma</p>
-          </div>
-        </div>
+    <PageLayout baslik="Mesajlar" altyazi="Kullanıcılar arası iç mesajlaşma" yenile={yenile}>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -277,8 +264,6 @@ export default function MesajlarPage() {
           </div>
 
         </div>
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

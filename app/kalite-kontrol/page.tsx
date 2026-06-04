@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddKalite, apiDeleteKalite, apiGetIsEmirleri, apiGetKalite } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { ShieldCheck, PlusCircle, Trash2, CheckCircle, XCircle, Camera, X } from "lucide-react";
 import type { KaliteKontrol, IsEmri } from "@/data/types";
 
@@ -95,34 +94,11 @@ export default function KaliteKontrolPage() {
         Math.max(1, liste.reduce((t, k) => t + k.uygunAdet + k.uygunsuzAdet, 0))) * 100).toFixed(1)
     : "0.0";
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Kalite Kontrol" altyazi="Üretim kalite kayıtları">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Kalite Kontrol</h1>
-            <p className="text-slate-500 text-sm mt-0.5">İş emirlerine kalite kontrol kaydı ekle</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -328,8 +304,6 @@ export default function KaliteKontrolPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

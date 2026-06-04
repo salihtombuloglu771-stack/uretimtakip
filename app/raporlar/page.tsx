@@ -4,9 +4,8 @@ import {
   apiGetIsEmirleri, apiGetDurus, apiGetOperasyonlar, apiGetMakinalar,
   apiGetMalzemeler, apiGetKalite, apiGetFaturalar, apiGetProjeler,
 } from "@/lib/api";
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
+import { useState, useEffect, useCallback } from "react";
+import PageLayout from "@/components/PageLayout";
 import { BarChart2, AlertTriangle, CheckCircle2, TrendingUp, Package, FileText, FolderKanban } from "lucide-react";
 import type { IsEmri, Durus, Operasyon, Malzeme, KaliteKontrol, Fatura, Proje } from "@/data/types";
 
@@ -45,17 +44,21 @@ export default function RaporlarPage() {
   const [projeler,    setProjeler]    = useState<Proje[]>([]);
   const [loading,     setLoading]     = useState(true);
 
-  useEffect(() => {
-    Promise.all([
-      apiGetIsEmirleri(), apiGetDurus(), apiGetOperasyonlar(), apiGetMakinalar(),
-      apiGetMalzemeler(), apiGetKalite(), apiGetFaturalar(), apiGetProjeler(),
-    ]).then(([ie, dur, op, mak, mlz, kal, fat, prj]) => {
-      setIsEmirleri(ie); setDuruslar(dur as Durus[]); setOplar(op as Operasyon[]); setMakinalar(mak as unknown[]);
-      setMalzemeler(mlz as Malzeme[]); setKalite(kal as KaliteKontrol[]);
-      setFaturalar(fat as Fatura[]); setProjeler(prj as Proje[]);
-      setLoading(false);
-    });
+  const yukle = useCallback(async () => {
+    setLoading(true);
+    const [ie, dur, op, mak, mlz, kal, fat, prj] = await Promise.all([
+      apiGetIsEmirleri().catch(() => []), apiGetDurus().catch(() => []),
+      apiGetOperasyonlar().catch(() => []), apiGetMakinalar().catch(() => []),
+      apiGetMalzemeler().catch(() => []), apiGetKalite().catch(() => []),
+      apiGetFaturalar().catch(() => []), apiGetProjeler().catch(() => []),
+    ]);
+    setIsEmirleri(ie); setDuruslar(dur as Durus[]); setOplar(op as Operasyon[]); setMakinalar(mak as unknown[]);
+    setMalzemeler(mlz as Malzeme[]); setKalite(kal as KaliteKontrol[]);
+    setFaturalar(fat as Fatura[]); setProjeler(prj as Proje[]);
+    setLoading(false);
   }, []);
+
+  useEffect(() => { yukle(); }, [yukle]);
 
   const toplamUretim = isEmirleri.reduce((t, k) => t + k.uretimAdedi, 0);
   const toplamFire   = isEmirleri.reduce((t, k) => t + k.fireAdedi, 0);
@@ -99,21 +102,8 @@ export default function RaporlarPage() {
   const aktifProje  = projeler.filter(p => p.durum === "aktif").length;
   const gecikmisPrj = projeler.filter(p => p.durum === "aktif" && p.bitisTarihi && new Date(p.bitisTarihi) < bugun).length;
 
-  if (loading) return (
-    <AuthGuard>
-      <div className="flex min-h-screen bg-slate-100"><Sidebar/>
-        <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-          <p className="text-slate-500 text-sm">Yükleniyor…</p>
-        </main>
-      </div>
-    </AuthGuard>
-  );
-
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar/>
-      <main className="flex-1 md:ml-60 p-4 sm:p-6 space-y-6">
+    <PageLayout baslik="Raporlar" altyazi="Üretim analizi ve sistem özeti" yenile={yukle} yukleniyor={loading}>
 
         <div className="flex items-center justify-between">
           <div>
@@ -255,8 +245,6 @@ export default function RaporlarPage() {
           </div>
         </div>
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

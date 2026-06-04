@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddIsEmri, apiGetIsEmirleri } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import IsEmriForm from "@/components/IsEmriForm";
 
 import { FilePlus, CheckCircle } from "lucide-react";
@@ -27,25 +26,7 @@ export default function UretimEmriPage() {
   }
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold flex items-center gap-2">
-              <FilePlus size={22} className="text-blue-500" /> Üretim Emri Gir
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Yeni üretim emrini buradan kaydet</p>
-          </div>
-          <div className="text-right">
-            <p className="text-slate-500 text-sm">
-              {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </p>
-            <p className="text-slate-400 text-xs mt-0.5">Toplam kayıt: {isEmriListesi.length}</p>
-          </div>
-        </div>
+    <PageLayout baslik="Üretim Emri Gir" altyazi="Yeni üretim emrini buradan kaydet">
 
         {sonKayit && (
           <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-3">
@@ -78,8 +59,6 @@ export default function UretimEmriPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

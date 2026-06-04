@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddOperasyon, apiGetIsEmirleri, apiGetOperasyonlar, apiUpdateOpBitis } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { Play, StopCircle, ClipboardList } from "lucide-react";
 import type { IsEmri, Operasyon } from "@/data/types";
 
@@ -65,34 +64,11 @@ export default function OperasyonTakibiPage() {
   const aktifSayi     = operasyonlar.filter((o) => !o.bitis).length;
   const tamamlananlar = [...operasyonlar].filter((o) => !!o.bitis).reverse();
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Operasyon Takibi" altyazi="Aktif ve tamamlanmış operasyonlar">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Operasyon Takibi</h1>
-            <p className="text-slate-500 text-sm mt-0.5">İş emirlerinde operasyon başlat / durdur, süreyi takip et</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-2 gap-4">
@@ -217,8 +193,6 @@ export default function OperasyonTakibiPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

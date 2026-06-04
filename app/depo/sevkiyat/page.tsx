@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddDepo, apiDeleteDepo, apiGetDepo } from "@/lib/api";
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
+import PageLayout from "@/components/PageLayout";
+import { useState, useEffect, useCallback } from "react";
 import { getRol } from "@/components/AuthGuard";
 import { Truck, PlusCircle, Trash2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import type { DepoHareketi } from "@/data/types";
@@ -27,13 +26,18 @@ export default function SevkiyatDepoPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const yukle = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await apiGetDepo();
+      setListe(data.filter((h) => h.depoTuru === "sevkiyat"));
+    } finally { setLoading(false); }
+  }, []);
+
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    apiGetDepo().then((data) => {
-      setListe(data.filter((h) => h.depoTuru === "sevkiyat"));
-      setLoading(false);
-    });
-  }, []);
+    yukle();
+  }, [yukle]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -68,36 +72,10 @@ export default function SevkiyatDepoPage() {
   const toplamGiris = liste.filter((h) => h.hareketTuru === "giris").reduce((t, h) => t + h.miktar, 0);
   const toplamCikis = liste.filter((h) => h.hareketTuru === "cikis").reduce((t, h) => t + h.miktar, 0);
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold flex items-center gap-2">
-              <Truck size={20} className="text-blue-500" /> Sevkiyat Deposu
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Sevkiyat depo giriş/çıkış hareketleri</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
+    <PageLayout baslik="Sevkiyat Depo" altyazi="Sevkiyat depo giriş/çıkış hareketleri" yenile={yukle} yukleniyor={loading}>
 
         {/* Özet */}
         <div className="grid grid-cols-3 gap-4">
@@ -226,8 +204,6 @@ export default function SevkiyatDepoPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

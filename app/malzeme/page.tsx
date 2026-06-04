@@ -2,9 +2,11 @@
 
 
 import { apiAddMalzeme, apiDeleteMalzeme, apiGetMalzemeler, apiUpdateFotograf } from "@/lib/api";
-import { useState, useEffect, useRef } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
+import { useState, useEffect, useRef, useCallback } from "react";
+import PageLayout from "@/components/PageLayout";
+import ConfirmModal from "@/components/ConfirmModal";
+import AramaKutusu from "@/components/AramaKutusu";
+import { useToast } from "@/components/Toast";
 import { getRol } from "@/components/AuthGuard";
 import { Layers, PlusCircle, Trash2, Download, Upload, AlertCircle, Camera, X } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -21,25 +23,34 @@ const BOSLUK: FormState = {
 };
 
 export default function MalzemePage() {
-  const [liste,       setListe]       = useState<Malzeme[]>([]);
-  const [form,        setForm]        = useState<FormState>(BOSLUK);
-  const [hata,        setHata]        = useState("");
-  const [loading,     setLoading]     = useState(true);
-  const [isAdmin,     setIsAdmin]     = useState(false);
-  const [importBilgi,  setImportBilgi]  = useState("");
-  const [formAcik,     setFormAcik]     = useState(false);
-  const [formFotograf, setFormFotograf] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [liste,         setListe]         = useState<Malzeme[]>([]);
+  const [form,          setForm]          = useState<FormState>(BOSLUK);
+  const [hata,          setHata]          = useState("");
+  const [loading,       setLoading]       = useState(true);
+  const [isAdmin,       setIsAdmin]       = useState(false);
+  const [importBilgi,   setImportBilgi]   = useState("");
+  const [formAcik,      setFormAcik]      = useState(false);
+  const [formFotograf,  setFormFotograf]  = useState<string | null>(null);
   const [fotografModal, setFotografModal] = useState<string | null>(null);
-  const dosyaRef   = useRef<HTMLInputElement>(null);
-  const kameraRef  = useRef<HTMLInputElement>(null);
-  const satirKameraRef = useRef<HTMLInputElement>(null);
+  const [arama,         setArama]         = useState("");
+  const [silId,         setSilId]         = useState<string | null>(null);
+  const dosyaRef        = useRef<HTMLInputElement>(null);
+  const kameraRef       = useRef<HTMLInputElement>(null);
+  const satirKameraRef  = useRef<HTMLInputElement>(null);
   const [satirKameraId, setSatirKameraId] = useState<string | null>(null);
-  const formRef  = useRef<HTMLDivElement>(null);
+  const formRef         = useRef<HTMLDivElement>(null);
+
+  const yukle = useCallback(async () => {
+    setLoading(true);
+    try { setListe(await apiGetMalzemeler()); }
+    finally { setLoading(false); }
+  }, []);
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    apiGetMalzemeler().then((data) => { setListe(data); setLoading(false); });
-  }, []);
+    yukle();
+  }, [yukle]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -100,9 +111,15 @@ export default function MalzemePage() {
     if (satirKameraRef.current) satirKameraRef.current.value = "";
   }
 
-  async function handleSil(id: string) {
-    await apiDeleteMalzeme(id);
-    setListe((p) => p.filter((m) => m.id !== id));
+  async function handleSil() {
+    if (!silId) return;
+    const m = liste.find(x => x.id === silId);
+    try {
+      await apiDeleteMalzeme(silId);
+      setListe(p => p.filter(x => x.id !== silId));
+      toast(`${m?.malzemeAdi ?? "Malzeme"} silindi.`, "basari");
+    } catch { toast("Silinemedi.", "hata"); }
+    finally { setSilId(null); }
   }
 
   // ── Excel'e Aktar ──────────────────────────────────────────────────────────
@@ -157,28 +174,20 @@ export default function MalzemePage() {
       eklenen++;
     }
 
-    setImportBilgi(`${eklenen} malzeme eklendi${atlanan > 0 ? `, ${atlanan} satır atlandı` : ""}.`);
-    setTimeout(() => setImportBilgi(""), 5000);
+    toast(`${eklenen} malzeme eklendi${atlanan > 0 ? `, ${atlanan} satır atlandı` : ""}.`, "basari");
+    setImportBilgi("");
     if (dosyaRef.current) dosyaRef.current.value = "";
   }
 
   const toplamDeger = liste.reduce((t, m) => t + m.stokMiktari * (m.birimFiyat ?? 0), 0);
-
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  const filtreli = liste.filter(m =>
+    arama === "" ||
+    m.malzemeAdi.toLowerCase().includes(arama.toLowerCase()) ||
+    m.malzemeKodu.toLowerCase().includes(arama.toLowerCase())
+  );
 
   return (
-    <AuthGuard>
+    <>
     {/* Gizli kamera inputları */}
     <input ref={kameraRef} type="file" accept="image/*" capture="environment"
       className="hidden" onChange={handleFormFotograf} />
@@ -200,19 +209,15 @@ export default function MalzemePage() {
       </div>
     )}
 
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Malzeme</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Malzeme kataloğu ve stok takibi</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
+    <PageLayout
+      baslik="Malzeme"
+      altyazi="Malzeme kataloğu ve stok takibi"
+      yenile={yukle}
+      yukleniyor={loading}
+      sagIcerik={
+        <AramaKutusu deger={arama} onChange={setArama} placeholder="Malzeme ara…" className="w-52" />
+      }
+    >
 
         {/* Özet */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -228,7 +233,6 @@ export default function MalzemePage() {
           </div>
         </div>
 
-        {/* Import bildirimi */}
         {importBilgi && (
           <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-3">
             <AlertCircle size={16} className="text-emerald-500 flex-shrink-0" />
@@ -318,7 +322,7 @@ export default function MalzemePage() {
               <Layers size={18} className="text-blue-500" /> Malzeme Listesi
             </h2>
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-full">{liste.length} malzeme</span>
+              <span className="text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-full">{filtreli.length}/{liste.length}</span>
 
               {/* Excel'e Aktar */}
               {liste.length > 0 && (
@@ -344,15 +348,14 @@ export default function MalzemePage() {
             </div>
           </div>
 
-          {liste.length === 0 ? (
+          {loading ? (
+            <div className="py-12 flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : filtreli.length === 0 ? (
             <div className="px-6 py-12 flex flex-col items-center gap-3">
               <Layers size={40} className="text-slate-200" />
-              <p className="text-slate-500 text-sm">Henüz malzeme kaydı yok.</p>
-              {isAdmin && (
-                <p className="text-slate-400 text-xs text-center">
-                  Formu kullanarak tek tek ekleyebilir<br />ya da Excel/CSV dosyası yükleyebilirsin.
-                </p>
-              )}
+              <p className="text-slate-500 text-sm">{arama ? "Aramanızla eşleşen malzeme yok." : "Henüz malzeme kaydı yok."}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -365,7 +368,7 @@ export default function MalzemePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {liste.map((m, i) => {
+                  {filtreli.map((m, i) => {
                     const deger = m.stokMiktari * (m.birimFiyat ?? 0);
                     return (
                       <tr key={m.id} className={`border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors ${i % 2 !== 0 ? "bg-slate-50/50" : ""}`}>
@@ -407,7 +410,7 @@ export default function MalzemePage() {
                               </button>
                             )}
                             {isAdmin && (
-                              <button onClick={() => handleSil(m.id)}
+                              <button onClick={() => setSilId(m.id)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                                 <Trash2 size={14} />
                               </button>
@@ -433,20 +436,21 @@ export default function MalzemePage() {
           </div>
         )}
 
-      </main>
-    </div>
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj={`"${liste.find(m => m.id === silId)?.malzemeAdi ?? "Malzeme"}" silinecek.`}
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
+    </PageLayout>
 
-    {/* Floating yeşil + butonu — herkes görebilir */}
+    {/* Floating yeşil + butonu */}
     {!formAcik && (
-      <button
-        onClick={handleFormAc}
-        title="Yeni Malzeme Ekle"
-        className="fixed bottom-8 right-8 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all active:scale-95 z-50"
-      >
+      <button onClick={handleFormAc} title="Yeni Malzeme Ekle"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all active:scale-95 z-50">
         <PlusCircle size={26} />
       </button>
     )}
-
-    </AuthGuard>
+    </>
   );
 }

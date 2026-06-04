@@ -1,54 +1,94 @@
 "use client";
 
-
 import { apiDeleteIsEmri, apiGetIsEmirleri } from "@/lib/api";
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
+import { useState, useEffect, useCallback } from "react";
+import PageLayout from "@/components/PageLayout";
 import StatsCards from "@/components/StatsCards";
 import IsEmriTablosu from "@/components/IsEmriTablosu";
-import AuthGuard from "@/components/AuthGuard";
-
+import ConfirmModal from "@/components/ConfirmModal";
+import AramaKutusu from "@/components/AramaKutusu";
+import { useToast } from "@/components/Toast";
 import type { IsEmri } from "@/data/types";
+import { AlertCircle } from "lucide-react";
 
 export default function IsEmirleriSayfasi() {
-  const [isEmriListesi, setIsEmriListesi] = useState<IsEmri[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const [liste,    setListe]    = useState<IsEmri[]>([]);
+  const [yukluyor, setYukluyor] = useState(true);
+  const [hata,     setHata]     = useState("");
+  const [arama,    setArama]    = useState("");
+  const [silId,    setSilId]    = useState<string | null>(null);
 
-  useEffect(() => {
-    apiGetIsEmirleri().then((data) => { setIsEmriListesi(data); setLoading(false); });
+  const yukle = useCallback(async () => {
+    setYukluyor(true);
+    setHata("");
+    try {
+      const data = await apiGetIsEmirleri();
+      setListe(data);
+    } catch {
+      setHata("Veriler yüklenemedi.");
+    } finally {
+      setYukluyor(false);
+    }
   }, []);
 
-  async function handleSil(id: string) {
-    await apiDeleteIsEmri(id);
-    setIsEmriListesi((p) => p.filter((k) => k.id !== id));
+  useEffect(() => { yukle(); }, [yukle]);
+
+  async function handleSil() {
+    if (!silId) return;
+    try {
+      await apiDeleteIsEmri(silId);
+      setListe(p => p.filter(k => k.id !== silId));
+      toast("İş emri silindi.", "basari");
+    } catch {
+      toast("Silinemedi, tekrar deneyin.", "hata");
+    } finally {
+      setSilId(null);
+    }
   }
 
+  const filtreli = liste.filter(k =>
+    arama === "" ||
+    k.isEmriNo.toLowerCase().includes(arama.toLowerCase()) ||
+    k.urunAdi.toLowerCase().includes(arama.toLowerCase()) ||
+    (k.makinaNo ?? "").toLowerCase().includes(arama.toLowerCase())
+  );
+
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout
+      baslik="İş Emirleri"
+      altyazi="Tüm iş emirleri toplu görünüm"
+      yenile={yukle}
+      yukleniyor={yukluyor}
+      sagIcerik={
+        <AramaKutusu deger={arama} onChange={setArama} placeholder="İş emri, ürün, makina…" className="w-56" />
+      }
+    >
+      <StatsCards isEmriListesi={liste} />
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">İş Emirleri</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Tüm iş emirleri toplu görünüm</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
+      {hata && (
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-3 text-red-600 text-sm">
+          <AlertCircle size={16} /> {hata}
         </div>
+      )}
 
-        <StatsCards isEmriListesi={isEmriListesi} />
+      {yukluyor ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-12 flex items-center justify-center shadow-sm">
+          <div className="w-7 h-7 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <IsEmriTablosu
+          isEmriListesi={filtreli}
+          onSil={id => setSilId(id)}
+        />
+      )}
 
-        {loading ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-400 text-sm shadow-sm">Yükleniyor…</div>
-        ) : (
-          <IsEmriTablosu isEmriListesi={isEmriListesi} onSil={handleSil} />
-        )}
-
-      </main>
-    </div>
-    </AuthGuard>
+      <ConfirmModal
+        acik={silId !== null}
+        mesaj="Bu iş emrini silmek istediğinizden emin misiniz?"
+        onOnayla={handleSil}
+        onIptal={() => setSilId(null)}
+      />
+    </PageLayout>
   );
 }

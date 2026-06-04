@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddDemirbas, apiDeleteDemirbas, apiGetDemirbaslar } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Building, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
 import type { DemirbasKayit } from "@/data/types";
@@ -71,34 +70,11 @@ export default function SabitKiymetPage() {
   const aktifSayi   = liste.filter((d) => d.durum === "aktif").length;
   const toplamDeger = liste.reduce((t, d) => t + (d.alisFiyati ?? 0), 0);
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Sabit Kıymet" altyazi="Demirbaş kayıtları">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Sabit Kıymet</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Demirbaş listesi ve takibi</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -233,8 +209,6 @@ export default function SabitKiymetPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

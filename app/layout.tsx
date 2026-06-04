@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import GlobalCamera from "@/components/GlobalCamera";
 import MesajBildirim from "@/components/MesajBildirim";
+import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "NexPlan",
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body>
-        {children}
-        <GlobalCamera />
-        <MesajBildirim />
+        <ToastProvider>
+          {children}
+          <GlobalCamera />
+          <MesajBildirim />
+        </ToastProvider>
       </body>
     </html>
   );

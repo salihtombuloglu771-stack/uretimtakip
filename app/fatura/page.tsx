@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { apiGetFaturalar, apiAddFatura, apiUpdateFaturaDurum, apiDeleteFatura } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import type { Fatura, FaturaKalem, FaturaTip, KdvOrani } from "@/data/types";
 import { FileText, PlusCircle, Trash2, Printer, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 
@@ -129,22 +128,14 @@ export default function FaturaPage() {
   const { araToplam, kdvToplam, genelToplam } = hesapla(form.kalemler);
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        {/* Başlık */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Fatura / İrsaliye</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Fatura ve irsaliye oluştur, yönet</p>
-          </div>
-          <button onClick={() => setFormAcik(v => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
-            <PlusCircle size={16} /> Yeni Belge
-          </button>
-        </div>
+    <PageLayout baslik="Fatura / İrsaliye" altyazi="Fatura ve irsaliye oluştur, yönet"
+      sagIcerik={
+        <button onClick={() => setFormAcik(v => !v)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
+          <PlusCircle size={16} /> Yeni Belge
+        </button>
+      }
+    >
 
         {/* Özet kartlar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -365,9 +356,7 @@ export default function FaturaPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    <div ref={printRef}/>
-    </AuthGuard>
+      <div ref={printRef}/>
+    </PageLayout>
   );
 }

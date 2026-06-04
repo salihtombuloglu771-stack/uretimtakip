@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar, apiUpdateKullaniciRol } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard, { getRol } from "@/components/AuthGuard";
+import { getRol } from "@/components/AuthGuard";
 import { Shield, PlusCircle, Trash2, Eye, EyeOff } from "lucide-react";
 
 import type { Kullanici, KullaniciRol } from "@/data/types";
@@ -79,35 +79,18 @@ export default function KullanicilarPage() {
 
   if (!isAdmin) {
     return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <div className="text-center">
-              <Shield size={48} className="text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm">Bu sayfaya erişim yetkiniz yok.</p>
-            </div>
-          </main>
+      <PageLayout baslik="Kullanıcı Yönetimi" altyazi="">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <Shield size={48} className="text-slate-300 mx-auto mb-3" />
+          <p className="text-slate-500 text-sm">Bu sayfaya erişim yetkiniz yok.</p>
         </div>
-      </AuthGuard>
+      </PageLayout>
     );
   }
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Kullanıcı Yönetimi" altyazi="Sistem kullanıcıları ve rol yönetimi">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Kullanıcı Yönetimi</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Sisteme giriş yapabilecek kullanıcıları yönet</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -262,8 +245,6 @@ export default function KullanicilarPage() {
           </p>
         </div>
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

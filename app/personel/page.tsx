@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddPersonel, apiDeletePersonel, apiGetPersonel } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { Users, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
 import type { Personel } from "@/data/types";
@@ -76,34 +75,11 @@ export default function PersonelPage() {
     oglen: "2. Vardiya",
   };
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Personel" altyazi="Çalışan kayıtları ve vardiya takibi">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Personel</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Çalışan kayıtları ve vardiya takibi</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -230,8 +206,6 @@ export default function PersonelPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

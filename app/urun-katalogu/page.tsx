@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddUrun, apiDeleteUrun, apiGetUrunler } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { getRol } from "@/components/AuthGuard";
 import { BookOpen, PlusCircle, Trash2 } from "lucide-react";
 import type { Urun } from "@/data/types";
@@ -57,34 +56,11 @@ export default function UrunKataloguPage() {
     setListe((p) => p.filter((u) => u.id !== id));
   }
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Ürün Kataloğu" altyazi="Ürün listesi ve fiyat bilgileri">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Ürün Kataloğu</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Ürünleri bir kez tanımla, iş emirlerinde hızlıca seç</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -177,8 +153,6 @@ export default function UrunKataloguPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

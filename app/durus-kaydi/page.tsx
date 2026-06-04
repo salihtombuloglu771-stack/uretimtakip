@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 
 import { apiAddDurus, apiDeleteDurus, apiGetDurus, apiGetMakinalar } from "@/lib/api";
+import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
 import { PauseCircle, PlusCircle, Trash2 } from "lucide-react";
 import type { Durus, DurusNeden, Makina } from "@/data/types";
 
@@ -76,34 +75,11 @@ export default function DurusKaydiPage() {
 
   const toplamDk = liste.reduce((t, d) => t + sureDk(d.baslangicTarihi, d.bitisTarihi), 0);
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar />
-          <main className="flex-1 md:ml-60 p-6 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Yükleniyor…</p>
-          </main>
-        </div>
-      </AuthGuard>
-    );
-  }
+  
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
+    <PageLayout baslik="Duruş Kaydı" altyazi="Makina duruş kayıtları">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Duruş Kaydı</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Makina arıza ve duruş sürelerini takip et</p>
-          </div>
-          <div className="text-slate-500 text-sm">
-            {new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </div>
-        </div>
 
         {/* Özet */}
         <div className="grid grid-cols-2 gap-4">
@@ -239,8 +215,6 @@ export default function DurusKaydiPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }

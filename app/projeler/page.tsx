@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import AuthGuard from "@/components/AuthGuard";
+import PageLayout from "@/components/PageLayout";
 import {
   apiGetProjeler, apiAddProje, apiUpdateProjeDurum, apiDeleteProje,
   apiGetGorevler, apiAddGorev, apiUpdateGorevDurum, apiDeleteGorev,
@@ -121,22 +120,14 @@ export default function ProjelerPage() {
   };
 
   return (
-    <AuthGuard>
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <main className="flex-1 md:ml-60 p-6 space-y-6">
-
-        {/* Başlık */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-slate-800 text-xl font-bold">Proje Yönetim</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Projeleri ve görevleri yönet</p>
-          </div>
-          <button onClick={() => setFormAcik(v => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
-            <PlusCircle size={16}/> Yeni Proje
-          </button>
-        </div>
+    <PageLayout baslik="Proje Yönetimi" altyazi="Projeleri ve görevleri yönet"
+      sagIcerik={
+        <button onClick={() => setFormAcik(v => !v)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
+          <PlusCircle size={16}/> Yeni Proje
+        </button>
+      }
+    >
 
         {/* Özet */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -326,8 +317,6 @@ export default function ProjelerPage() {
           </div>
         )}
 
-      </main>
-    </div>
-    </AuthGuard>
+    </PageLayout>
   );
 }
