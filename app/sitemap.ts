@@ -1,6 +1,6 @@
-import { MetadataRoute } from "next";
+﻿import { MetadataRoute } from "next";
 
-const BASE = "https://uretimtakip-six.vercel.app";
+const BASE = "https://nexplan.net";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "./globals.css";
 import GlobalCamera from "@/components/GlobalCamera";
 import MesajBildirim from "@/components/MesajBildirim";
 import { ToastProvider } from "@/components/Toast";
 
-const BASE = "https://uretimtakip-six.vercel.app";
+const BASE = "https://nexplan.net";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE),

@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next";
+﻿import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -28,6 +28,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://uretimtakip-six.vercel.app/sitemap.xml",
+    sitemap: "https://nexplan.net/sitemap.xml",
   };
 }
