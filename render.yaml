@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: nexplan-backend
+    env: node
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: nexplan_jwt_super_gizli_anahtar_2024
+      - key: FRONTEND_URL
+        value: https://uretimtakip-six.vercel.app
+      - key: SUPABASE_URL
+        value: https://ajuknbinpumzjvzpwmrn.supabase.co
+      - key: SUPABASE_KEY
+        value: sb_publishable_lEsc46RkFYSs01mRU-89IA_TRybDVhL
