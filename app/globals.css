@@ -363,6 +363,20 @@ button.bg-amber-500:not(:disabled):hover {
 .animate-cta-glow { animation: cta-glow 2.5s ease-in-out infinite; }
 
 /* ══════════════════════════════════════════════
+   HEADER KONVEYÖR ANİMASYONU
+══════════════════════════════════════════════ */
+
+@keyframes header-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.header-conveyor {
+  animation: header-scroll 40s linear infinite;
+  will-change: transform;
+}
+.header-conveyor:hover { animation-play-state: paused; }
+
+/* ══════════════════════════════════════════════
    ADIM NUMARASI HOVER BOUNCE
 ══════════════════════════════════════════════ */
 

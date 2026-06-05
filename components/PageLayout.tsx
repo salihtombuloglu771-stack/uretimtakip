@@ -3,7 +3,11 @@
 import AuthGuard from "./AuthGuard";
 import Sidebar from "./Sidebar";
 import { ReactNode } from "react";
-import { RefreshCw, ArrowLeft } from "lucide-react";
+import {
+  RefreshCw, ArrowLeft,
+  Package, Cpu, Wrench, ShieldCheck, BarChart2,
+  ClipboardList, Layers, Zap, Factory, Timer,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -15,6 +19,11 @@ interface Props {
   yukleniyor?: boolean;
 }
 
+const KONVEYOR = [
+  Package, Cpu, Wrench, ShieldCheck, BarChart2,
+  ClipboardList, Layers, Zap, Factory, Timer,
+];
+
 export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenile, yukleniyor }: Props) {
   const router = useRouter();
 
@@ -24,8 +33,14 @@ export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenil
         <Sidebar />
         <main className="flex-1 md:ml-60 min-w-0">
           {/* Sayfa başlığı */}
-          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70 px-6 py-4">
-            <div className="flex items-center justify-between gap-4">
+          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70 px-6 py-4 relative overflow-hidden">
+            {/* Konveyör bant animasyonu */}
+            <div className="header-conveyor absolute inset-0 flex items-center gap-9 pointer-events-none opacity-[0.055] select-none">
+              {[...KONVEYOR, ...KONVEYOR, ...KONVEYOR, ...KONVEYOR].map((Ikon, i) => (
+                <Ikon key={i} size={17} className="text-blue-600 flex-shrink-0" />
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => router.back()}
