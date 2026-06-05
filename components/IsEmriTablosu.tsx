@@ -1,7 +1,23 @@
 "use client";
 
-import { Trash2, ClipboardList, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trash2, ClipboardList, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import type { IsEmri } from "@/data/types";
+
+function csvIndir(liste: IsEmri[]) {
+  const satirlar = [
+    ["İş Emri No","Ürün","Makina","Üretim Adedi","Fire Adedi","Birim Fiyat","Vardiya","Tarih"].join(";"),
+    ...liste.map(k => [
+      k.isEmriNo, k.urunAdi, k.makinaNo ?? "",
+      k.uretimAdedi, k.fireAdedi, k.birimFiyat ?? 0,
+      k.vardiya ?? "", k.tarih,
+    ].join(";")),
+  ];
+  const blob = new Blob(["﻿" + satirlar.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `is-emirleri-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
 
 const VARDİYA_ETIKET: Record<string, string> = {
   sabah: "1. Vardiya",
@@ -61,9 +77,15 @@ export default function IsEmriTablosu({ isEmriListesi, onSil }: Props) {
           <h2 className="text-slate-800 font-semibold text-base flex items-center gap-2">
             <ClipboardList size={18} className="text-blue-500" /> İş Emirleri
           </h2>
-          <span className="text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-full font-medium">
-            {isEmriListesi.length} kayıt
-          </span>
+          <div className="flex items-center gap-2">
+            <button onClick={() => csvIndir(isEmriListesi)}
+              className="flex items-center gap-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 transition-all">
+              <Download size={13}/> CSV İndir
+            </button>
+            <span className="text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-full font-medium">
+              {isEmriListesi.length} kayıt
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-4 gap-3">
           {[

@@ -73,11 +73,12 @@ export default function GirisPage() {
       </div>
 
       {/* Kart */}
-      <div className="relative w-full max-w-sm">
+      <div className="relative w-full max-w-sm animate-fade-in-up">
 
         {/* Logo + Başlık */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-blue-500/30"
+        <div className="flex flex-col items-center mb-8"
+          style={{ animationDelay: "0ms" }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-blue-500/30 animate-float"
             style={{ background: "linear-gradient(135deg, #60a5fa, #1d4ed8)" }}>
             <img src="/logo.svg" alt="NexPlan" className="w-10 h-10" />
           </div>
@@ -86,16 +87,17 @@ export default function GirisPage() {
         </div>
 
         {/* Form kartı — cam efekti */}
-        <div className="rounded-2xl p-8 shadow-2xl border border-white/10"
+        <div className="rounded-2xl p-8 shadow-2xl border border-white/10 animate-fade-in-up"
           style={{
             background: "rgba(255,255,255,0.05)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
+            animationDelay: "80ms",
           }}>
 
           <form onSubmit={handleGiris} className="space-y-5">
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 animate-fade-in-up" style={{ animationDelay: "150ms" }}>
               <label className="text-blue-200/70 text-xs font-medium uppercase tracking-wider">
                 Kullanıcı Adı
               </label>
@@ -105,12 +107,12 @@ export default function GirisPage() {
                 onChange={e => setKullanici(e.target.value)}
                 placeholder="admin veya operatör"
                 autoComplete="username"
-                className="rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 border border-white/10 outline-none transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                className="rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 border border-white/10 outline-none transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 hover:border-white/25"
                 style={{ background: "rgba(255,255,255,0.07)" }}
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 animate-fade-in-up" style={{ animationDelay: "220ms" }}>
               <label className="text-blue-200/70 text-xs font-medium uppercase tracking-wider">
                 Şifre
               </label>
@@ -121,7 +123,7 @@ export default function GirisPage() {
                   onChange={e => setSifre(e.target.value)}
                   placeholder="••••••"
                   autoComplete="current-password"
-                  className="w-full rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-white/30 border border-white/10 outline-none transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-white/30 border border-white/10 outline-none transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 hover:border-white/25"
                   style={{ background: "rgba(255,255,255,0.07)" }}
                 />
                 <button type="button" onClick={() => setSifreGoster(!sifreGoster)}
@@ -131,7 +133,7 @@ export default function GirisPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 animate-fade-in-up" style={{ animationDelay: "290ms" }}>
               <input
                 id="beniHatirla"
                 type="checkbox"
@@ -145,20 +147,26 @@ export default function GirisPage() {
             </div>
 
             {hata && (
-              <div className="flex items-center gap-2 text-red-300 text-sm rounded-xl px-4 py-3 border border-red-400/20"
+              <div key={hata}
+                className="animate-shake flex items-center gap-2 text-red-300 text-sm rounded-xl px-4 py-3 border border-red-400/20"
                 style={{ background: "rgba(239,68,68,0.1)" }}>
                 <span className="text-red-400">⚠</span> {hata}
               </div>
             )}
 
-            <button type="submit" disabled={yukleniyor}
-              className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl text-sm text-white transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-blue-500/25"
-              style={{ background: yukleniyor ? undefined : "linear-gradient(135deg, #3b82f6, #1d4ed8)" }}>
-              {yukleniyor
-                ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : <><LogIn size={16} /> Giriş Yap</>
-              }
-            </button>
+            <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+              <button type="submit" disabled={yukleniyor}
+                className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl text-sm text-white disabled:opacity-50 shadow-lg shadow-blue-500/25"
+                style={{
+                  background: yukleniyor ? "rgba(59,130,246,0.5)" : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+                  transition: "transform 0.14s ease, box-shadow 0.18s ease, filter 0.14s ease",
+                }}>
+                {yukleniyor
+                  ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <><LogIn size={16} /> Giriş Yap</>
+                }
+              </button>
+            </div>
           </form>
 
           <p className="mt-6 text-white/25 text-xs text-center">
@@ -167,7 +175,7 @@ export default function GirisPage() {
         </div>
 
         {/* Alt NexPlan yazısı */}
-        <p className="text-center text-white/20 text-xs mt-6">
+        <p className="text-center text-white/20 text-xs mt-6 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
           © 2025 NexPlan ERP
         </p>
       </div>

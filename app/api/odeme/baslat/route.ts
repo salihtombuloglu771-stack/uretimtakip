@@ -4,7 +4,7 @@
 const IYZICO_URL    = process.env.IYZICO_URL    ?? "https://sandbox-api.iyzipay.com";
 const API_KEY       = process.env.IYZICO_API_KEY ?? "sandbox-your-api-key";
 const SECRET_KEY    = process.env.IYZICO_SECRET  ?? "sandbox-your-secret-key";
-const SITE_URL      = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nexplan.net";
+const SITE_URL      = process.env.NEXT_PUBLIC_SITE_URL ?? "https://uretimtakip-six.vercel.app";
 
 import crypto from "crypto";
 

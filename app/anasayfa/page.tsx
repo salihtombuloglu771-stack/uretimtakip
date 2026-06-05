@@ -1,12 +1,17 @@
 "use client";
 
 import {
-  apiGetIsEmirleri, apiGetMakinalar, apiGetKalite,
-  apiGetMalzemeler, apiGetDurus, apiGetOperasyonlar,
-} from "@/lib/api";
-import { useState, useEffect, useCallback } from "react";
+  getIsEmirleri, getMakinalar, getKaliteKontroller,
+  getMalzemeler, getDuruslar, getOperasyonlar,
+} from "@/lib/db";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 import PageLayout from "@/components/PageLayout";
 import EmptyState from "@/components/EmptyState";
+import { SkeletonStats, SkeletonTable, SkeletonCard } from "@/components/Skeleton";
+import { useCounter } from "@/hooks/useCounter";
 import {
   FilePlus, Cpu, ShieldCheck, Layers,
   TrendingUp, Clock, AlertTriangle, Play,
@@ -39,27 +44,58 @@ function bugunMu(str: string) {
   return new Date(str).toDateString() === new Date().toDateString();
 }
 
+interface KpiKartProps {
+  baslik: string; deger: string; alt: string;
+  renk: string; bg: string; ikon: React.ReactNode;
+  href: string; delay: number;
+}
+function KpiKart({ baslik, deger, alt, renk, bg, ikon, href, delay }: KpiKartProps) {
+  const sayi = parseInt(deger.replace(/\D/g, ""), 10);
+  const animSayi = useCounter(isNaN(sayi) ? 0 : sayi, 800, delay);
+  const gosterim = isNaN(sayi) ? deger : (deger.includes("/")
+    ? `${animSayi}/${deger.split("/")[1]}`
+    : animSayi.toLocaleString("tr-TR"));
+
+  return (
+    <Link href={href}
+      className="animate-fade-in-up bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-lg hover:border-blue-200 hover:-translate-y-1 transition-all group"
+      style={{ animationDelay: `${delay}ms` }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${bg} ${renk} transition-transform group-hover:scale-110`}>
+          {ikon}
+        </div>
+      </div>
+      <p className={`text-2xl font-black leading-none animate-count ${renk}`}
+        style={{ animationDelay: `${delay + 100}ms` }}>
+        {gosterim}
+      </p>
+      <p className="text-slate-600 text-xs font-semibold mt-1.5">{baslik}</p>
+      <p className="text-slate-400 text-[11px] mt-0.5 truncate">{alt}</p>
+    </Link>
+  );
+}
+
 export default function AnasayfaPage() {
   const [yukluyor, setYukluyor] = useState(true);
   const [isAdmin,  setIsAdmin]  = useState(false);
   const [kulAdi,   setKulAdi]   = useState("");
 
-  const [isEmirleri,  setIsEmirleri]  = useState<Awaited<ReturnType<typeof apiGetIsEmirleri>>>([]);
-  const [makinalar,   setMakinalar]   = useState<Awaited<ReturnType<typeof apiGetMakinalar>>>([]);
-  const [kaliteler,   setKaliteler]   = useState<Awaited<ReturnType<typeof apiGetKalite>>>([]);
-  const [malzemeler,  setMalzemeler]  = useState<Awaited<ReturnType<typeof apiGetMalzemeler>>>([]);
-  const [duruslar,    setDuruslar]    = useState<Awaited<ReturnType<typeof apiGetDurus>>>([]);
-  const [operasyonlar,setOperasyonlar]= useState<Awaited<ReturnType<typeof apiGetOperasyonlar>>>([]);
+  const [isEmirleri,  setIsEmirleri]  = useState<Awaited<ReturnType<typeof getIsEmirleri>>>([]);
+  const [makinalar,   setMakinalar]   = useState<Awaited<ReturnType<typeof getMakinalar>>>([]);
+  const [kaliteler,   setKaliteler]   = useState<Awaited<ReturnType<typeof getKaliteKontroller>>>([]);
+  const [malzemeler,  setMalzemeler]  = useState<Awaited<ReturnType<typeof getMalzemeler>>>([]);
+  const [duruslar,    setDuruslar]    = useState<Awaited<ReturnType<typeof getDuruslar>>>([]);
+  const [operasyonlar,setOperasyonlar]= useState<Awaited<ReturnType<typeof getOperasyonlar>>>([]);
 
   const yukle = useCallback(async () => {
     setYukluyor(true);
     const [ie, mk, kk, mlz, dr, op] = await Promise.all([
-      apiGetIsEmirleri().catch(() => []),
-      apiGetMakinalar().catch(() => []),
-      apiGetKalite().catch(() => []),
-      apiGetMalzemeler().catch(() => []),
-      apiGetDurus().catch(() => []),
-      apiGetOperasyonlar().catch(() => []),
+      getIsEmirleri().catch(() => []),
+      getMakinalar().catch(() => []),
+      getKaliteKontroller().catch(() => []),
+      getMalzemeler().catch(() => []),
+      getDuruslar().catch(() => []),
+      getOperasyonlar().catch(() => []),
     ]);
     setIsEmirleri(ie);   setMakinalar(mk);   setKaliteler(kk);
     setMalzemeler(mlz);  setDuruslar(dr);    setOperasyonlar(op);
@@ -168,6 +204,21 @@ export default function AnasayfaPage() {
     ] : []),
   ];
 
+  // Son 7 gün üretim trendi
+  const trendVerisi = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const gunStr = d.toDateString();
+      const gunIE  = isEmirleri.filter(k => new Date(k.tarih).toDateString() === gunStr);
+      return {
+        gun:    d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" }),
+        uretim: gunIE.reduce((s, k) => s + k.uretimAdedi, 0),
+        fire:   gunIE.reduce((s, k) => s + k.fireAdedi,   0),
+      };
+    });
+  }, [isEmirleri]);
+
   const tarih = new Date().toLocaleDateString("tr-TR", {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   });
@@ -201,25 +252,60 @@ export default function AnasayfaPage() {
       </div>
 
       {/* Özet kartlar */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {OZET_KARTLAR.map((k, i) => (
-          <Link key={k.baslik} href={k.href}
-            className="animate-fade-in-up bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5 transition-all group"
-            style={{ animationDelay: `${i * 60}ms` }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${k.bg} ${k.renk}`}>
-                {k.ikon}
-              </div>
-              {k.deger !== "0" && k.baslik === "Kritik Stok" && (
-                <AlertTriangle size={14} className="text-orange-400" />
-              )}
+      {yukluyor
+        ? <SkeletonStats adet={6} />
+        : <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            {OZET_KARTLAR.map((k, i) => (
+              <KpiKart key={k.baslik} {...k} delay={i * 70} />
+            ))}
+          </div>}
+
+      {/* Son 7 Gün Üretim Trendi */}
+      {!yukluyor && (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-slate-800 font-semibold text-sm">Son 7 Gün Üretim Trendi</h2>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Toplam: {trendVerisi.reduce((s, g) => s + g.uretim, 0).toLocaleString("tr-TR")} adet
+              </p>
             </div>
-            <p className={`text-2xl font-bold leading-none ${k.renk}`}>{k.deger}</p>
-            <p className="text-slate-500 text-xs font-medium mt-1">{k.baslik}</p>
-            <p className="text-slate-400 text-[11px] mt-0.5 truncate">{k.alt}</p>
-          </Link>
-        ))}
-      </div>
+            <div className="flex items-center gap-4 text-xs text-slate-400">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-blue-500 inline-block rounded"/>Üretim</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-red-400 inline-block rounded"/>Fire</span>
+            </div>
+          </div>
+          <div className="p-4" style={{ height: 220 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendVerisi} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradUretim" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="gradFire" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#f87171" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#f87171" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="gun" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false}/>
+                <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false}/>
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(val: any, name: any) => [
+                    Number(val).toLocaleString("tr-TR") + " adet",
+                    name === "uretim" ? "Üretim" : "Fire",
+                  ]}
+                />
+                <Area type="monotone" dataKey="uretim" stroke="#3b82f6" strokeWidth={2} fill="url(#gradUretim)" dot={{ fill: "#3b82f6", r: 3 }}/>
+                <Area type="monotone" dataKey="fire"   stroke="#f87171" strokeWidth={2} fill="url(#gradFire)"   dot={{ fill: "#f87171", r: 3 }}/>
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

@@ -277,3 +277,13 @@ export const addKullanici = async (
 
 export const deleteKullanici = async (id: string) =>
   supabase.from("kullanicilar").delete().eq("id", id);
+
+// ─── Okunmamış mesaj sayısı ───────────────────────────────────────────────────
+export const getOkunmamisMesajSayisi = async (kullaniciAdi: string): Promise<number> => {
+  const { count } = await supabase
+    .from("mesajlar")
+    .select("*", { count: "exact", head: true })
+    .eq("alici", kullaniciAdi)
+    .eq("okundu", false);
+  return count ?? 0;
+};

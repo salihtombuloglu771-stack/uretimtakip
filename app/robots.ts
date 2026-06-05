@@ -28,6 +28,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://nexplan.net/sitemap.xml",
+    sitemap: "https://uretimtakip-six.vercel.app/sitemap.xml",
   };
 }

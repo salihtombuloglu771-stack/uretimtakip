@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useCounter } from "@/hooks/useCounter";
 import {
   ClipboardList, Wrench, ShieldCheck, Layers,
   BarChart2, ArrowRight, CheckCircle2,
@@ -10,12 +11,28 @@ import {
   Zap, Lock, Globe, BadgeCheck, Users,
 } from "lucide-react";
 
+/* Animasyonlu sayaç bileşeni */
+function Sayac({ hedef, suffix = "", prefix = "", sure = 1400, gecikme = 0 }: {
+  hedef: number; suffix?: string; prefix?: string; sure?: number; gecikme?: number;
+}) {
+  const deger = useCounter(hedef, sure, gecikme);
+  return <>{prefix}{deger.toLocaleString("tr-TR")}{suffix}</>;
+}
+
 export default function LandingPage() {
   const [oturum,    setOturum]    = useState(false);
   const [form,      setForm]      = useState({ ad: "", firma: "", tel: "", email: "" });
   const [gonderildi,setGonderildi]= useState(false);
   const [aktifSoru, setAktifSoru] = useState<number | null>(null);
   const [scrolled,  setScrolled]  = useState(false);
+
+  /* Canlı aktivite sayacı — her 8 saniyede +1 artar */
+  const [canliSayac, setCanliSayac] = useState(1247);
+  const canliRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    canliRef.current = setInterval(() => setCanliSayac(n => n + 1), 8000);
+    return () => { if (canliRef.current) clearInterval(canliRef.current); };
+  }, []);
 
   useEffect(() => {
     setOturum(!!localStorage.getItem("uretim_oturum"));
@@ -222,46 +239,135 @@ export default function LandingPage() {
         {/* Arka plan nokta deseni */}
         <div className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}/>
-        <div className="relative max-w-5xl mx-auto">
-          <div className="animate-fade-in-up badge-shine inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-blue-200 text-sm font-medium mb-7">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
-            Türk üretim firmalarına özel ERP
-          </div>
-          <h1 className="animate-fade-in-up text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight"
-            style={{ animationDelay: "80ms" }}>
-            Fabrikanızı kağıtsız<br/>
-            <span className="text-gradient-animate">yönetin.</span>
-          </h1>
-          <p className="animate-fade-in-up text-blue-100/80 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
-            style={{ animationDelay: "160ms" }}>
-            İş emirleri, makina takibi, kalite kontrol ve stok — hepsi tek sistemde.
-            Kurulum yok, IT desteği gerekir, bugün başlayabilirsiniz.
-          </p>
-          <div className="animate-fade-in-up flex flex-col sm:flex-row gap-3" style={{ animationDelay: "240ms" }}>
-            <a href="#demo"
-              className="animate-cta-glow inline-flex items-center justify-center gap-2 bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl text-sm hover:bg-blue-50 transition-colors shadow-lg">
-              Ücretsiz Demo İsteyin <ArrowRight size={16}/>
-            </a>
-            <Link href="/giris"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-3.5 rounded-xl text-sm transition-colors">
-              Sisteme Gir
-            </Link>
-          </div>
-          <p className="animate-fade-in-up text-blue-300/60 text-xs mt-5" style={{ animationDelay: "320ms" }}>
-            30 gün ücretsiz · Kredi kartı gerekmez · Verileriniz Türkiye/AB sunucularında
-          </p>
-          <div className="animate-fade-in-up flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/10" style={{ animationDelay: "400ms" }}>
-            {[
-              { deger: "150+",  etiket: "Aktif firma" },
-              { deger: "%98",   etiket: "Memnuniyet oranı" },
-              { deger: "7/24",  etiket: "Destek hattı" },
-              { deger: "1 gün", etiket: "Ortalama kurulum" },
-            ].map(s => (
-              <div key={s.etiket}>
-                <div className="text-white font-black text-2xl leading-none">{s.deger}</div>
-                <div className="text-blue-300/70 text-xs mt-1">{s.etiket}</div>
+        <div className="relative max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* ── Sol: metin + CTA ── */}
+            <div>
+              <div className="animate-fade-in-up badge-shine inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-blue-200 text-sm font-medium mb-7">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
+                Türk üretim firmalarına özel ERP
               </div>
-            ))}
+              <h1 className="animate-fade-in-up text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight"
+                style={{ animationDelay: "80ms" }}>
+                Fabrikanızı kağıtsız<br/>
+                <span className="text-gradient-animate">yönetin.</span>
+              </h1>
+              <p className="animate-fade-in-up text-blue-100/80 text-lg max-w-xl mb-8 leading-relaxed"
+                style={{ animationDelay: "160ms" }}>
+                İş emirleri, makina takibi, kalite kontrol ve stok — hepsi tek sistemde.
+                IT desteği gerekir, bugün başlayabilirsiniz.
+              </p>
+              <div className="animate-fade-in-up flex flex-col sm:flex-row gap-3" style={{ animationDelay: "240ms" }}>
+                <a href="#demo"
+                  className="animate-cta-glow inline-flex items-center justify-center gap-2 bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl text-sm hover:bg-blue-50 transition-colors shadow-lg">
+                  Ücretsiz Demo İsteyin <ArrowRight size={16}/>
+                </a>
+                <Link href="/giris"
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-3.5 rounded-xl text-sm transition-colors">
+                  Sisteme Gir
+                </Link>
+              </div>
+              <p className="animate-fade-in-up text-blue-300/60 text-xs mt-4" style={{ animationDelay: "320ms" }}>
+                30 gün ücretsiz · Kredi kartı gerekmez · Verileriniz Türkiye/AB sunucularında
+              </p>
+              <div className="animate-fade-in-up inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-xs text-blue-200 mt-5" style={{ animationDelay: "380ms" }}>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping-slow inline-block"/>
+                Son 24 saatte <span className="text-white font-bold mx-1">{canliSayac.toLocaleString("tr-TR")}</span> üretim emri işlendi
+              </div>
+              <div className="animate-fade-in-up flex flex-wrap gap-8 mt-6 pt-6 border-t border-white/10" style={{ animationDelay: "440ms" }}>
+                {[
+                  { node: <Sayac hedef={150} suffix="+" sure={1600} gecikme={500}/>, etiket: "Aktif firma" },
+                  { node: <Sayac hedef={98}  prefix="%" sure={1400} gecikme={700}/>, etiket: "Memnuniyet" },
+                  { node: <>7/24</>,  etiket: "Destek hattı" },
+                  { node: <>1 gün</>, etiket: "Ortalama kurulum" },
+                ].map((s, i) => (
+                  <div key={i}>
+                    <div className="text-white font-black text-2xl leading-none">{s.node}</div>
+                    <div className="text-blue-300/70 text-xs mt-1">{s.etiket}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Sağ: Dashboard mockup ── */}
+            <div className="hidden lg:block animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+              <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-3 shadow-2xl shadow-black/30">
+                {/* Tarayıcı çubuğu */}
+                <div className="flex items-center gap-1.5 mb-3 px-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/>
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80"/>
+                  <div className="flex-1 bg-white/10 rounded-md h-5 ml-2 flex items-center px-2">
+                    <span className="text-white/40 text-[9px]">nexplan.app/anasayfa</span>
+                  </div>
+                </div>
+                {/* Uygulama çerçevesi */}
+                <div className="rounded-xl overflow-hidden bg-slate-100 flex" style={{ height: 280 }}>
+                  {/* Sidebar */}
+                  <div className="w-10 bg-gradient-to-b from-slate-800 to-slate-900 flex flex-col items-center pt-3 gap-2 flex-shrink-0">
+                    <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center mb-1">
+                      <span className="text-white font-black text-[8px]">N</span>
+                    </div>
+                    {[0,1,2,3,4].map(i => (
+                      <div key={i} className={`w-6 h-6 rounded-lg ${i===0?"bg-blue-600/60":"bg-white/10"}`}/>
+                    ))}
+                  </div>
+                  {/* İçerik */}
+                  <div className="flex-1 p-3 flex flex-col gap-2.5 overflow-hidden">
+                    {/* Header çubuğu */}
+                    <div className="bg-white rounded-lg h-7 flex items-center px-3 gap-2 shadow-sm flex-shrink-0">
+                      <div className="w-24 h-2.5 bg-slate-200 rounded"/>
+                      <div className="flex-1"/>
+                      <div className="w-16 h-4 bg-blue-600 rounded-lg"/>
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600"/>
+                    </div>
+                    {/* KPI kartları */}
+                    <div className="grid grid-cols-3 gap-2 flex-shrink-0">
+                      {[
+                        { renk: "bg-blue-500",    bg: "bg-blue-50",   deger: "24", etiket: "Aktif Emir" },
+                        { renk: "bg-emerald-500", bg: "bg-emerald-50",deger: "%2.1",etiket: "Fire Oranı" },
+                        { renk: "bg-amber-500",   bg: "bg-amber-50",  deger: "6",  etiket: "Bakım Bekl." },
+                      ].map(k => (
+                        <div key={k.etiket} className={`${k.bg} rounded-lg p-2`}>
+                          <div className={`w-4 h-4 rounded ${k.renk} mb-1.5`}/>
+                          <div className="text-[11px] font-black text-slate-800">{k.deger}</div>
+                          <div className="text-[8px] text-slate-400 mt-0.5">{k.etiket}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Tablo */}
+                    <div className="bg-white rounded-lg p-2 flex-1 shadow-sm overflow-hidden">
+                      <div className="flex gap-2 pb-1.5 mb-1.5 border-b border-slate-100">
+                        {["İş Emri", "Ürün", "Adet", "Durum"].map(h => (
+                          <div key={h} className="flex-1 text-[7px] font-bold text-slate-400 uppercase">{h}</div>
+                        ))}
+                      </div>
+                      {[
+                        { no:"IE-001", urun:"Mil Dişlisi", adet:"250", durum:"bg-emerald-400" },
+                        { no:"IE-002", urun:"Flanş",       adet:"120", durum:"bg-blue-400" },
+                        { no:"IE-003", urun:"Piston Kolu", adet:"80",  durum:"bg-amber-400" },
+                        { no:"IE-004", urun:"Bağlantı P.", adet:"340", durum:"bg-emerald-400" },
+                      ].map(r => (
+                        <div key={r.no} className="flex gap-2 py-1 border-b border-slate-50 last:border-0 items-center">
+                          <div className="flex-1 text-[8px] font-semibold text-blue-600">{r.no}</div>
+                          <div className="flex-1 text-[8px] text-slate-500 truncate">{r.urun}</div>
+                          <div className="flex-1 text-[8px] font-semibold text-slate-700">{r.adet}</div>
+                          <div className="flex-1">
+                            <span className={`inline-block w-2 h-2 rounded-full ${r.durum}`}/>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {/* Parlayan kenarlık efekti */}
+                <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, transparent 60%)" }}/>
+              </div>
+              {/* Alt etiket */}
+              <p className="text-center text-blue-300/60 text-xs mt-3">Gerçek zamanlı dashboard önizlemesi</p>
+            </div>
+
           </div>
         </div>
       </section>
@@ -531,6 +637,70 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── KARŞILAŞTIRMA ── */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="reveal text-center mb-12">
+            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-3">Neden NexPlan?</p>
+            <h2 className="text-3xl font-bold text-slate-800 mb-3">Excel'den farkı ne?</h2>
+            <p className="text-slate-500 text-sm">Çoğu firma Excel'de başlar — ama büyüdükçe yetersiz kalır.</p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left px-6 py-4 text-slate-500 font-semibold text-xs uppercase tracking-wide w-1/3">Özellik</th>
+                  <th className="px-6 py-4 text-center">
+                    <span className="inline-flex items-center gap-1.5 text-slate-400 font-semibold text-xs uppercase tracking-wide">
+                      <span className="text-lg">📊</span> Excel / Kağıt
+                    </span>
+                  </th>
+                  <th className="px-6 py-4 text-center bg-blue-50 rounded-tr-2xl">
+                    <span className="inline-flex items-center gap-1.5 text-blue-700 font-bold text-xs uppercase tracking-wide">
+                      <span className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center text-white font-black text-xs">N</span>
+                      NexPlan
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { ozellik: "Gerçek zamanlı üretim takibi",   excel: false, nexplan: true  },
+                  { ozellik: "Otomatik fire oranı hesaplama",   excel: false, nexplan: true  },
+                  { ozellik: "Makina arıza geçmişi",            excel: false, nexplan: true  },
+                  { ozellik: "Mobil erişim (telefon/tablet)",   excel: false, nexplan: true  },
+                  { ozellik: "Çok kullanıcılı aynı anda giriş", excel: false, nexplan: true  },
+                  { ozellik: "Otomatik raporlama",              excel: false, nexplan: true  },
+                  { ozellik: "Kritik stok uyarısı",             excel: false, nexplan: true  },
+                  { ozellik: "Veri kaybı riski",                excel: true,  nexplan: false },
+                ].map(({ ozellik, excel, nexplan }, i) => (
+                  <tr key={i} className={`border-b border-slate-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}`}>
+                    <td className="px-6 py-3.5 text-slate-700 font-medium">{ozellik}</td>
+                    <td className="px-6 py-3.5 text-center">
+                      {excel
+                        ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 text-xs font-bold">✓</span>
+                        : <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 text-xs font-bold">✕</span>
+                      }
+                    </td>
+                    <td className="px-6 py-3.5 text-center bg-blue-50/50">
+                      {nexplan
+                        ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 text-xs font-bold">✓</span>
+                        : <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 text-xs font-bold">✕</span>
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="reveal text-center mt-8">
+            <a href="#demo" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl text-sm transition-colors shadow-lg">
+              Excel'den kurtulun, demo isteyin <ArrowRight size={16}/>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── SSS ── */}
       <section id="sss" className="py-20 px-6 bg-slate-50">
         <div className="max-w-2xl mx-auto">
@@ -660,7 +830,21 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+          {/* KVKK & güven rozetleri */}
+          <div className="border-t border-slate-800 pt-6 flex flex-wrap items-center justify-center gap-3 mb-5">
+            {[
+              { ikon: "🔒", label: "SSL Şifreli" },
+              { ikon: "🇹🇷", label: "KVKK Uyumlu" },
+              { ikon: "☁️", label: "Bulut Yedekleme" },
+              { ikon: "🛡️", label: "JWT Güvenlik" },
+              { ikon: "🇪🇺", label: "GDPR Uyumlu" },
+            ].map(r => (
+              <div key={r.label} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-full px-3 py-1 text-slate-400 text-xs">
+                <span>{r.ikon}</span> {r.label}
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
             <p>© 2026 NexPlan ERP. Tüm hakları saklıdır.</p>
             <Link href="/giris" className="text-blue-400 hover:text-blue-300 transition-colors">
               Müşteri girişi →
