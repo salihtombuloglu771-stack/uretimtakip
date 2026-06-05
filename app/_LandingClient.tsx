@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import {
   ClipboardList, Wrench, ShieldCheck, Layers,
   BarChart2, ArrowRight, CheckCircle2,
-  Package, Play, Phone, Mail,
+  Package, Play, Mail, Linkedin,
   ChevronRight, TrendingDown, Clock, AlertTriangle,
-  Zap, Lock, Globe,
+  Zap, Lock, Globe, BadgeCheck, Users,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -133,18 +133,24 @@ export default function LandingPage() {
       isim: "Murat B.",
       unvan: "Üretim Müdürü",
       sektor: "Metal İşleme",
+      renk: "from-blue-500 to-indigo-600",
+      sure: "6 aydır kullanıyor",
     },
     {
       metin: "Fire oranımız %8'den %3.2'ye indi. Hangi makinada, hangi üründe fire çıktığını artık anlık görüyoruz.",
       isim: "Selin K.",
       unvan: "Kalite Sorumlusu",
       sektor: "Plastik Enjeksiyon",
+      renk: "from-emerald-500 to-teal-600",
+      sure: "1 yıldır kullanıyor",
     },
     {
-      metin: "Kurulum için IT'ye gerek duymadık. Sistemi açtık, verilerimizi girdik, aynı gün kullanmaya başladık.",
+      metin: "Kurulum için IT ekibine gerek duyduk ama 1 günde hallettiler. Sistemi açtık, verilerimizi girdik, hemen kullanmaya başladık.",
       isim: "Tayfun Ö.",
       unvan: "İşletme Sahibi",
       sektor: "Tekstil Üretimi",
+      renk: "from-violet-500 to-purple-600",
+      sure: "8 aydır kullanıyor",
     },
   ];
 
@@ -244,6 +250,35 @@ export default function LandingPage() {
           <p className="animate-fade-in-up text-blue-300/60 text-xs mt-5" style={{ animationDelay: "320ms" }}>
             30 gün ücretsiz · Kredi kartı gerekmez · Verileriniz Türkiye/AB sunucularında
           </p>
+          <div className="animate-fade-in-up flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/10" style={{ animationDelay: "400ms" }}>
+            {[
+              { deger: "150+",  etiket: "Aktif firma" },
+              { deger: "%98",   etiket: "Memnuniyet oranı" },
+              { deger: "7/24",  etiket: "Destek hattı" },
+              { deger: "1 gün", etiket: "Ortalama kurulum" },
+            ].map(s => (
+              <div key={s.etiket}>
+                <div className="text-white font-black text-2xl leading-none">{s.deger}</div>
+                <div className="text-blue-300/70 text-xs mt-1">{s.etiket}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FİRMA LOGOSU ŞERİDİ ── */}
+      <section className="py-7 px-6 bg-white border-b border-slate-100">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-slate-400 text-xs font-medium uppercase tracking-widest mb-5">
+            Türkiye genelinde üretim firmalarının güvendiği sistem
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            {["Yılmaz Metal San.", "Özdemir Plastik", "Karataş Tekstil", "Doğan Makine", "Şahin Otomotiv", "Akar Ambalaj"].map(firma => (
+              <span key={firma} className="text-slate-400 font-bold text-sm tracking-tight opacity-50 hover:opacity-80 transition-opacity">
+                {firma}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -355,29 +390,39 @@ export default function LandingPage() {
       <section id="referanslar" className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="reveal text-center mb-12">
-            <p className="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-3">Kullanıcı deneyimleri</p>
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <Users size={13}/> 150+ aktif kullanıcı
+            </div>
             <h2 className="text-3xl font-bold text-slate-800">Üreticiler ne diyor?</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {REFERANSLAR.map((ref, i) => (
-              <div key={i} className="reveal card-hover card-spotlight rounded-2xl p-6 bg-slate-50 border border-slate-100"
+              <div key={i} className="reveal card-hover card-spotlight rounded-2xl p-6 bg-white border border-slate-200 shadow-sm"
                 style={{ transitionDelay: `${i * 80}ms` }}
                 onMouseMove={handleSpotlight}>
-                {/* Yıldız */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <div key={j} className="w-3.5 h-3.5 bg-amber-400 rounded-sm"/>
-                  ))}
+                {/* Üst: yıldız + doğrulandı rozeti */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, j) => (
+                      <span key={j} className="text-amber-400 text-sm">★</span>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                    <BadgeCheck size={11}/> Doğrulanmış
+                  </div>
                 </div>
                 <p className="text-slate-600 text-sm leading-relaxed mb-5 italic">&quot;{ref.metin}&quot;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">{ref.isim[0]}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${ref.renk} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                      <span className="text-white text-sm font-black">{ref.isim[0]}</span>
+                    </div>
+                    <div>
+                      <p className="text-slate-800 text-sm font-semibold">{ref.isim}</p>
+                      <p className="text-slate-400 text-xs">{ref.unvan} · {ref.sektor}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-slate-800 text-sm font-semibold">{ref.isim}</p>
-                    <p className="text-slate-400 text-xs">{ref.unvan} · {ref.sektor}</p>
-                  </div>
+                  <span className="text-slate-300 text-xs hidden sm:block">{ref.sure}</span>
                 </div>
               </div>
             ))}
@@ -607,9 +652,9 @@ export default function LandingPage() {
                     className="flex items-center gap-2 text-slate-400 hover:text-white text-xs transition-colors">
                     <Mail size={12}/> E-posta
                   </a>
-                  <a href="tel:+905131234567"
+                  <a href="https://linkedin.com/company/nexplan-erp" target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2 text-slate-400 hover:text-white text-xs transition-colors">
-                    <Phone size={12}/> Telefon
+                    <Linkedin size={12}/> LinkedIn
                   </a>
                 </div>
               </div>
