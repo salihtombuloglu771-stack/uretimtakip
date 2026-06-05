@@ -35,9 +35,9 @@ export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenil
           {/* Sayfa başlığı */}
           <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70 px-6 py-4 relative overflow-hidden">
             {/* Konveyör bant animasyonu */}
-            <div className="header-conveyor absolute inset-0 flex items-center gap-9 pointer-events-none opacity-[0.18] select-none">
+            <div className="header-conveyor absolute inset-0 flex items-center gap-9 pointer-events-none opacity-[0.32] select-none">
               {[...KONVEYOR, ...KONVEYOR, ...KONVEYOR, ...KONVEYOR].map((Ikon, i) => (
-                <Ikon key={i} size={17} className="text-blue-600 flex-shrink-0" />
+                <Ikon key={i} size={20} className="text-blue-600 flex-shrink-0" />
               ))}
             </div>
             <div className="flex items-center justify-between gap-4 relative z-10">
