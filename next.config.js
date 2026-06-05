@@ -24,7 +24,7 @@ const guvenlikBasliklari = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self'",
-      "connect-src 'self' https://*.supabase.co https://nexplan-backend.up.railway.app https://*.trycloudflare.com",
+      "connect-src 'self' https://*.supabase.co https://*.vercel.app https://*.trycloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
