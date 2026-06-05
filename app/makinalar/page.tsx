@@ -181,17 +181,8 @@ export default function MakinalarPage() {
                     <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Bakım Periyodu (Gün)</label>
                     <div className="relative">
                       <input name="bakimPeriyoduGun" value={form.bakimPeriyoduGun} onChange={handleChange}
-                        placeholder="90" inputMode="numeric" className={INP + " pr-16"} />
+                        placeholder="ör. 90" inputMode="numeric" className={INP + " pr-16"} />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium">gün</span>
-                    </div>
-                    <div className="flex gap-1.5">
-                      {[30, 60, 90, 180].map(g => (
-                        <button key={g} type="button"
-                          onClick={() => setForm(p => ({ ...p, bakimPeriyoduGun: String(g) }))}
-                          className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${form.bakimPeriyoduGun === String(g) ? "bg-blue-50 border-blue-300 text-blue-600 font-semibold" : "border-slate-200 text-slate-500 hover:border-slate-300"}`}>
-                          {g}
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
