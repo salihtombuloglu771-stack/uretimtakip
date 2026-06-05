@@ -3,7 +3,8 @@
 import AuthGuard from "./AuthGuard";
 import Sidebar from "./Sidebar";
 import { ReactNode } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   children: ReactNode;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenile, yukleniyor }: Props) {
+  const router = useRouter();
+
   return (
     <AuthGuard>
       <div className="flex min-h-screen" style={{ background: "#f4f6fb" }}>
@@ -23,9 +26,17 @@ export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenil
           {/* Sayfa başlığı */}
           <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70 px-6 py-4">
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <h1 className="text-slate-800 text-lg font-bold leading-tight">{baslik}</h1>
-                {altyazi && <p className="text-slate-400 text-xs mt-0.5">{altyazi}</p>}
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => router.back()}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all text-sm font-medium shadow-sm">
+                  <ArrowLeft size={15} />
+                  <span>Geri</span>
+                </button>
+                <div className="min-w-0">
+                  <h1 className="text-slate-800 text-lg font-bold leading-tight truncate">{baslik}</h1>
+                  {altyazi && <p className="text-slate-400 text-xs mt-0.5">{altyazi}</p>}
+                </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 {sagIcerik}
@@ -40,7 +51,7 @@ export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenil
             </div>
           </div>
           {/* İçerik */}
-          <div className="p-6 space-y-5">
+          <div className="p-6 space-y-5 animate-page-enter">
             {children}
           </div>
         </main>

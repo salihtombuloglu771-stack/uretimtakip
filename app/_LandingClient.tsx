@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   ClipboardList, Wrench, ShieldCheck, Layers,
   BarChart2, ArrowRight, CheckCircle2,
-  Package, Play, PauseCircle, Phone, Mail,
+  Package, Play, Phone, Mail,
   ChevronRight, TrendingDown, Clock, AlertTriangle,
   Zap, Lock, Globe,
 } from "lucide-react";
@@ -15,18 +15,30 @@ export default function LandingPage() {
   const [form,      setForm]      = useState({ ad: "", firma: "", tel: "", email: "" });
   const [gonderildi,setGonderildi]= useState(false);
   const [aktifSoru, setAktifSoru] = useState<number | null>(null);
+  const [scrolled,  setScrolled]  = useState(false);
 
   useEffect(() => {
     setOturum(!!localStorage.getItem("uretim_oturum"));
+
     const obs = new IntersectionObserver(
       (entries) => entries.forEach(e => {
         if (e.isIntersecting) { e.target.classList.add("in-view"); obs.unobserve(e.target); }
       }),
       { threshold: 0.1 }
     );
-    document.querySelectorAll(".reveal, .reveal-scale, .reveal-left").forEach(el => obs.observe(el));
-    return () => obs.disconnect();
+    document.querySelectorAll(".reveal, .reveal-scale, .reveal-left, .reveal-right").forEach(el => obs.observe(el));
+
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => { obs.disconnect(); window.removeEventListener("scroll", onScroll); };
   }, []);
+
+  function handleSpotlight(e: React.MouseEvent<HTMLDivElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--x", `${((e.clientX - r.left) / r.width) * 100}%`);
+    e.currentTarget.style.setProperty("--y", `${((e.clientY - r.top) / r.height) * 100}%`);
+  }
 
   function handleForm(e: React.FormEvent) {
     e.preventDefault();
@@ -163,7 +175,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white font-sans">
 
       {/* ── NAVBAR ── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100">
+      <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100 transition-shadow duration-300 ${scrolled ? "shadow-md shadow-slate-200/60" : ""}`}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-sm">
@@ -194,27 +206,34 @@ export default function LandingPage() {
       {/* ── HERO ── */}
       <section style={{ background: "linear-gradient(135deg, #0c1445 0%, #1a237e 40%, #0d47a1 100%)" }}
         className="text-white py-20 md:py-28 px-6 relative overflow-hidden">
-        {/* Arka plan desen */}
+        {/* Aurora orbs */}
+        <div className="aurora-orb w-[480px] h-[480px] bg-blue-400 opacity-[0.13]"
+          style={{ top: "-15%", right: "-8%", animationDuration: "11s" }}/>
+        <div className="aurora-orb w-[360px] h-[360px] bg-indigo-500 opacity-[0.12]"
+          style={{ bottom: "-10%", left: "-6%", animationDuration: "9s", animationDelay: "3s" }}/>
+        <div className="aurora-orb w-[260px] h-[260px] bg-cyan-400 opacity-[0.10]"
+          style={{ top: "35%", right: "18%", animationDuration: "13s", animationDelay: "6s" }}/>
+        {/* Arka plan nokta deseni */}
         <div className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}/>
         <div className="relative max-w-5xl mx-auto">
-          <div className="animate-fade-in-up inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-blue-200 text-sm font-medium mb-7">
+          <div className="animate-fade-in-up badge-shine inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-blue-200 text-sm font-medium mb-7">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
             Türk üretim firmalarına özel ERP
           </div>
           <h1 className="animate-fade-in-up text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight"
             style={{ animationDelay: "80ms" }}>
             Fabrikanızı kağıtsız<br/>
-            <span className="text-blue-300">yönetin.</span>
+            <span className="text-gradient-animate">yönetin.</span>
           </h1>
           <p className="animate-fade-in-up text-blue-100/80 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
             style={{ animationDelay: "160ms" }}>
             İş emirleri, makina takibi, kalite kontrol ve stok — hepsi tek sistemde.
-            Kurulum yok, IT desteği gerekmez, bugün başlayabilirsiniz.
+            Kurulum yok, IT desteği gerekir, bugün başlayabilirsiniz.
           </p>
           <div className="animate-fade-in-up flex flex-col sm:flex-row gap-3" style={{ animationDelay: "240ms" }}>
             <a href="#demo"
-              className="inline-flex items-center justify-center gap-2 bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl text-sm hover:bg-blue-50 transition-colors shadow-lg">
+              className="animate-cta-glow inline-flex items-center justify-center gap-2 bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl text-sm hover:bg-blue-50 transition-colors shadow-lg">
               Ücretsiz Demo İsteyin <ArrowRight size={16}/>
             </a>
             <Link href="/giris"
@@ -269,8 +288,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {OZELLIKLER.map(({ ikon: Ikon, baslik, renk, list }, i) => (
               <div key={baslik}
-                className="reveal card-hover rounded-2xl p-6 border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200"
-                style={{ transitionDelay: `${(i % 3) * 70}ms` }}>
+                className="reveal card-hover card-spotlight rounded-2xl p-6 border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200"
+                style={{ transitionDelay: `${(i % 3) * 70}ms` }}
+                onMouseMove={handleSpotlight}>
                 <div className={`w-10 h-10 ${renk} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
                   <Ikon size={18} className="text-white"/>
                 </div>
@@ -319,7 +339,7 @@ export default function LandingPage() {
               },
             ].map((adim, i) => (
               <div key={adim.no} className="reveal-scale text-center" style={{ transitionDelay: `${i * 100}ms` }}>
-                <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-black mx-auto mb-4 shadow-md shadow-blue-200">
+                <div className="step-num w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-black mx-auto mb-4 shadow-md shadow-blue-200 cursor-default">
                   {adim.no}
                 </div>
                 <p className="text-blue-600 text-xs font-bold uppercase tracking-wide mb-2">{adim.sure}</p>
@@ -340,8 +360,9 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {REFERANSLAR.map((ref, i) => (
-              <div key={i} className="reveal card-hover rounded-2xl p-6 bg-slate-50 border border-slate-100"
-                style={{ transitionDelay: `${i * 80}ms` }}>
+              <div key={i} className="reveal card-hover card-spotlight rounded-2xl p-6 bg-slate-50 border border-slate-100"
+                style={{ transitionDelay: `${i * 80}ms` }}
+                onMouseMove={handleSpotlight}>
                 {/* Yıldız */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, j) => (
@@ -428,10 +449,11 @@ export default function LandingPage() {
               },
             ].map((p, i) => (
               <div key={p.ad}
-                className={`reveal-scale relative rounded-2xl border-2 p-7 flex flex-col ${p.renk}`}
-                style={{ transitionDelay: `${i * 100}ms` }}>
+                className={`reveal-scale card-spotlight relative rounded-2xl border-2 p-7 flex flex-col ${p.renk}`}
+                style={{ transitionDelay: `${i * 100}ms` }}
+                onMouseMove={handleSpotlight}>
                 {p.populer && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
+                  <div className="badge-shine absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
                     En çok tercih edilen
                   </div>
                 )}
@@ -479,13 +501,15 @@ export default function LandingPage() {
                   onClick={() => setAktifSoru(aktifSoru === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition-colors">
                   <span className="text-slate-800 font-medium text-sm">{item.soru}</span>
-                  <ChevronRight size={16} className={`text-slate-400 transition-transform flex-shrink-0 ml-3 ${aktifSoru === i ? "rotate-90" : ""}`}/>
+                  <ChevronRight size={16} className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ml-3 ${aktifSoru === i ? "rotate-90" : ""}`}/>
                 </button>
-                {aktifSoru === i && (
-                  <div className="px-6 pb-5 text-slate-500 text-sm leading-relaxed border-t border-slate-100 pt-4 animate-fade-in-up">
-                    {item.cevap}
+                <div className={`sss-body ${aktifSoru === i ? "open" : ""}`}>
+                  <div>
+                    <div className="px-6 pb-5 text-slate-500 text-sm leading-relaxed border-t border-slate-100 pt-4">
+                      {item.cevap}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
