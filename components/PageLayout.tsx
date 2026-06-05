@@ -37,7 +37,7 @@ export default function PageLayout({ children, baslik, altyazi, sagIcerik, yenil
             {/* Konveyör bant animasyonu */}
             <div className="header-conveyor absolute inset-0 flex items-center gap-9 pointer-events-none opacity-[0.32] select-none">
               {[...KONVEYOR, ...KONVEYOR, ...KONVEYOR, ...KONVEYOR].map((Ikon, i) => (
-                <Ikon key={i} size={20} className="text-blue-600 flex-shrink-0" />
+                <Ikon key={i} size={20} className="text-slate-900 flex-shrink-0" />
               ))}
             </div>
             <div className="flex items-center justify-between gap-4 relative z-10">
