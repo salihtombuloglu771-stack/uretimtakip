@@ -80,13 +80,15 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <head>
-        {/* Crisp canlı destek widget */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.$crisp=[];window.CRISP_WEBSITE_ID="YOUR_CRISP_ID";
-          (function(){var d=document;var s=d.createElement("script");
-          s.src="https://client.crisp.chat/l.js";s.async=1;
-          d.getElementsByTagName("head")[0].appendChild(s);})();
-        `}} />
+        {/* Crisp canlı destek widget — NEXT_PUBLIC_CRISP_ID env var ile aktif olur */}
+        {process.env.NEXT_PUBLIC_CRISP_ID && (
+          <script dangerouslySetInnerHTML={{ __html: `
+            window.$crisp=[];window.CRISP_WEBSITE_ID="${process.env.NEXT_PUBLIC_CRISP_ID}";
+            (function(){var d=document;var s=d.createElement("script");
+            s.src="https://client.crisp.chat/l.js";s.async=1;
+            d.getElementsByTagName("head")[0].appendChild(s);})();
+          `}} />
+        )}
         {/* JSON-LD Yapısal Veri — Google için */}
         <script
           type="application/ld+json"
