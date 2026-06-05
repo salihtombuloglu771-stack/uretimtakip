@@ -1,8 +1,13 @@
 // Backend API istemcisi — tüm veri işlemleri buradan yapılır
 
 const PROD_API = "https://backend-gamma-dun-25.vercel.app";
-const _url = process.env.NEXT_PUBLIC_API_URL ?? PROD_API;
-const BASE = (_url.replace(/^﻿/, "").trim() || PROD_API).replace(/\/$/, "");
+// Production'da daima Vercel backend — tunnel URL'leri veya boş değerleri görmezden gel
+const _envUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/^﻿/, "").trim();
+const BASE = (
+  process.env.NODE_ENV === "production"
+    ? (_envUrl.includes("vercel.app") ? _envUrl : PROD_API)
+    : (_envUrl || PROD_API)
+).replace(/\/$/, "");
 
 function token(): string {
   if (typeof window === "undefined") return "";
