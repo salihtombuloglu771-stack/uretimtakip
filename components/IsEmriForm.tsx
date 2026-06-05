@@ -6,7 +6,7 @@ import { getUrunler } from "@/lib/db";
 import { apiGetMakinalar } from "@/lib/api";
 import type { YeniIsEmri, Urun } from "@/data/types";
 
-interface Props { onKaydet: (veri: YeniIsEmri) => void; }
+interface Props { onKaydet: (veri: YeniIsEmri) => Promise<void>; kaydediyor?: boolean; }
 
 interface FormState {
   isEmriNo: string; makinaNo: string; urunAdi: string;
@@ -30,7 +30,7 @@ function autoEmriNo() {
 const INP = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all hover:border-slate-300";
 const LABEL = "text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5";
 
-export default function IsEmriForm({ onKaydet }: Props) {
+export default function IsEmriForm({ onKaydet, kaydediyor = false }: Props) {
   const [form, setForm]         = useState<FormState>({ ...BOSLUK, isEmriNo: autoEmriNo() });
   const [hata, setHata]         = useState("");
   const [urunler, setUrunler]   = useState<Urun[]>([]);
@@ -78,8 +78,8 @@ export default function IsEmriForm({ onKaydet }: Props) {
     setOnizleme(true);
   }
 
-  function handleKaydet() {
-    onKaydet({
+  async function handleKaydet() {
+    await onKaydet({
       isEmriNo: form.isEmriNo.trim(), makinaNo: form.makinaNo.trim(),
       urunAdi: form.urunAdi.trim(), uretimAdedi: uretim, fireAdedi: isNaN(fire) ? 0 : fire,
       birimFiyat: isNaN(fiyat) ? 0 : fiyat,
@@ -122,9 +122,12 @@ export default function IsEmriForm({ onKaydet }: Props) {
             className="px-5 py-2.5 text-slate-500 text-sm border border-slate-200 rounded-xl hover:bg-slate-50">
             Düzenle
           </button>
-          <button onClick={handleKaydet}
-            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-xl transition-colors">
-            <CheckCircle2 size={16} /> Onayla ve Kaydet
+          <button onClick={handleKaydet} disabled={kaydediyor}
+            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors">
+            {kaydediyor
+              ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/><span>Kaydediliyor…</span></>
+              : <><CheckCircle2 size={16} /> Onayla ve Kaydet</>
+            }
           </button>
         </div>
       </div>
