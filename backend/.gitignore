@@ -1,5 +1,5 @@
 node_modules/
-dist/
+# dist/ — artık git'te izleniyor (Render pre-built deploy)
 data/
 .env
 *.log
