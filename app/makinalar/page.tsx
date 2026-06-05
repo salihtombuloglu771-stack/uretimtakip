@@ -256,11 +256,25 @@ export default function MakinalarPage() {
                       </td>
                       <td className="px-5 py-3.5 text-slate-500 text-xs">{m.bakimPeriyoduGun ? `${m.bakimPeriyoduGun} gün` : "—"}</td>
                       <td className="px-5 py-3.5">
-                        {bakim.mesaj ? (
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${bakim.uyari ? "text-amber-600 bg-amber-100" : "text-emerald-600 bg-emerald-100"}`}>
-                            {bakim.uyari && <AlertTriangle size={10} />}{bakim.mesaj}
-                          </span>
-                        ) : "—"}
+                        {bakim.mesaj ? (() => {
+                          const kalan = m.sonBakimTarihi && m.bakimPeriyoduGun
+                            ? (() => { const s = new Date(m.sonBakimTarihi); s.setDate(s.getDate() + m.bakimPeriyoduGun!); return Math.ceil((s.getTime() - Date.now()) / 86400000); })()
+                            : null;
+                          const yuzde = kalan !== null && m.bakimPeriyoduGun ? Math.max(0, Math.min(100, (kalan / m.bakimPeriyoduGun) * 100)) : null;
+                          return (
+                            <div className="flex flex-col gap-1 min-w-[120px]">
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${bakim.uyari ? "text-amber-600" : "text-emerald-600"}`}>
+                                {bakim.uyari && <AlertTriangle size={10} />}{bakim.mesaj}
+                              </span>
+                              {yuzde !== null && (
+                                <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                  <div className={`h-1.5 rounded-full transition-all ${yuzde < 10 ? "bg-red-500" : yuzde < 30 ? "bg-amber-500" : "bg-emerald-500"}`}
+                                    style={{ width: `${yuzde}%` }} />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })() : <span className="text-slate-300 text-xs">—</span>}
                       </td>
                       {isAdmin && (
                         <td className="px-5 py-3.5">

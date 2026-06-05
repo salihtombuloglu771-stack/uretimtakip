@@ -27,15 +27,11 @@ export default function PersonelPage() {
   const [liste,   setListe]   = useState<Personel[]>([]);
   const [form,    setForm]    = useState<FormState>(BOSLUK);
   const [hata,    setHata]    = useState("");
-  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
-    apiGetPersonel().then((data) => {
-      setListe(data);
-      setLoading(false);
-    });
+    apiGetPersonel().then(setListe);
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -181,17 +177,46 @@ export default function PersonelPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {liste.map((p, i) => (
+                  {liste.map((p, i) => {
+                    const kisaltma = p.adSoyad.split(" ").map((s: string) => s[0]).join("").slice(0, 2).toUpperCase();
+                    const renkler = ["bg-blue-500","bg-violet-500","bg-emerald-500","bg-amber-500","bg-teal-500","bg-rose-500"];
+                    const avatarRenk = renkler[p.adSoyad.charCodeAt(0) % renkler.length];
+                    let kidem = "";
+                    if (p.iseGirisTarihi) {
+                      const gun = Math.floor((Date.now() - new Date(p.iseGirisTarihi).getTime()) / 86400000);
+                      const yil = Math.floor(gun / 365);
+                      const ay  = Math.floor((gun % 365) / 30);
+                      kidem = yil > 0 ? `${yil} yıl${ay > 0 ? " " + ay + " ay" : ""}` : ay > 0 ? `${ay} ay` : `${gun} gün`;
+                    }
+                    return (
                     <tr key={p.id} className={`border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors ${i % 2 !== 0 ? "bg-slate-50/50" : ""}`}>
-                      <td className="px-5 py-3.5 text-blue-600 font-medium">{p.sicilNo}</td>
-                      <td className="px-5 py-3.5 text-slate-800 font-medium">{p.adSoyad}</td>
-                      <td className="px-5 py-3.5 text-slate-600">{p.departman || "—"}</td>
-                      <td className="px-5 py-3.5 text-slate-600">{p.pozisyon || "—"}</td>
-                      <td className="px-5 py-3.5 text-slate-500 text-xs">
-                        {p.vardiya ? VARDIYA_ETIKET[p.vardiya] : "—"}
+                      <td className="px-5 py-3.5 text-blue-600 font-medium text-xs">{p.sicilNo}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarRenk}`}>
+                            {kisaltma}
+                          </div>
+                          <span className="text-slate-800 font-medium">{p.adSoyad}</span>
+                        </div>
                       </td>
-                      <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">
-                        {p.iseGirisTarihi ? new Date(p.iseGirisTarihi).toLocaleDateString("tr-TR") : "—"}
+                      <td className="px-5 py-3.5">
+                        {p.departman
+                          ? <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{p.departman}</span>
+                          : <span className="text-slate-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-slate-600 text-sm">{p.pozisyon || "—"}</td>
+                      <td className="px-5 py-3.5">
+                        {p.vardiya
+                          ? <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${p.vardiya === "sabah" ? "bg-blue-50 text-blue-600" : "bg-violet-50 text-violet-600"}`}>
+                              {VARDIYA_ETIKET[p.vardiya]}
+                            </span>
+                          : <span className="text-slate-300 text-xs">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-col">
+                          <span className="text-slate-700 text-xs">{p.iseGirisTarihi ? new Date(p.iseGirisTarihi).toLocaleDateString("tr-TR") : "—"}</span>
+                          {kidem ? <span className="text-slate-400 text-[10px]">{kidem}</span> : null}
+                        </div>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -209,7 +234,9 @@ export default function PersonelPage() {
                         </td>
                       )}
                     </tr>
-                  ))}
+                  );
+                  })}
+
                 </tbody>
               </table>
             </div>

@@ -220,17 +220,18 @@ export default function MalzemePage() {
     >
 
         {/* Özet */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white border border-blue-100 rounded-xl p-5 shadow-sm">
-            <p className="text-slate-500 text-xs uppercase tracking-wide">Toplam Malzeme</p>
-            <p className="text-blue-600 text-3xl font-bold mt-1">{liste.length}</p>
-          </div>
-          <div className="bg-white border border-violet-100 rounded-xl p-5 shadow-sm">
-            <p className="text-slate-500 text-xs uppercase tracking-wide">Toplam Stok Değeri</p>
-            <p className="text-violet-600 text-3xl font-bold mt-1">
-              {toplamDeger.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
-            </p>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: "Toplam Malzeme",   deger: liste.length,                                                         renk: "text-blue-600",    border: "border-blue-100"    },
+            { label: "Stok Değeri",       deger: toplamDeger.toLocaleString("tr-TR", { maximumFractionDigits: 0 }) + " ₺", renk: "text-violet-600", border: "border-violet-100" },
+            { label: "Kritik Stok (≤10)", deger: liste.filter(m => m.stokMiktari > 0 && m.stokMiktari <= 10).length,  renk: liste.filter(m => m.stokMiktari > 0 && m.stokMiktari <= 10).length > 0 ? "text-amber-500" : "text-slate-400", border: "border-amber-100" },
+            { label: "Sıfır Stok",        deger: liste.filter(m => m.stokMiktari === 0).length,                        renk: liste.filter(m => m.stokMiktari === 0).length > 0 ? "text-red-500" : "text-slate-400", border: "border-red-100" },
+          ].map(({ label, deger, renk, border }) => (
+            <div key={label} className={`bg-white border ${border} rounded-xl p-4 shadow-sm`}>
+              <p className="text-slate-500 text-xs uppercase tracking-wide">{label}</p>
+              <p className={`${renk} text-2xl font-bold mt-1`}>{deger}</p>
+            </div>
+          ))}
         </div>
 
         {importBilgi && (
@@ -392,7 +393,19 @@ export default function MalzemePage() {
                         <td className="px-5 py-3.5 text-blue-600 font-medium">{m.malzemeKodu}</td>
                         <td className="px-5 py-3.5 text-slate-800">{m.malzemeAdi}</td>
                         <td className="px-5 py-3.5 text-slate-500">{m.birim}</td>
-                        <td className="px-5 py-3.5 text-slate-800 font-medium">{m.stokMiktari.toLocaleString("tr-TR")}</td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-800">{m.stokMiktari.toLocaleString("tr-TR")}</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                              m.stokMiktari === 0        ? "bg-red-100 text-red-600"
+                              : m.stokMiktari <= 10      ? "bg-amber-100 text-amber-600"
+                              : m.stokMiktari <= 50      ? "bg-yellow-100 text-yellow-700"
+                              :                            "bg-emerald-100 text-emerald-600"
+                            }`}>
+                              {m.stokMiktari === 0 ? "Sıfır" : m.stokMiktari <= 10 ? "Kritik" : m.stokMiktari <= 50 ? "Düşük" : "Yeterli"}
+                            </span>
+                          </div>
+                        </td>
                         <td className="px-5 py-3.5 text-slate-600">
                           {m.birimFiyat != null ? m.birimFiyat.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺" : "—"}
                         </td>
