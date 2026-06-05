@@ -6,7 +6,8 @@ import PageLayout from "@/components/PageLayout";
 import { useState, useEffect } from "react";
 import IsEmriForm from "@/components/IsEmriForm";
 
-import { FilePlus, CheckCircle } from "lucide-react";
+import { CheckCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import type { IsEmri, YeniIsEmri } from "@/data/types";
 
 export default function UretimEmriPage() {
@@ -29,11 +30,17 @@ export default function UretimEmriPage() {
     <PageLayout baslik="Üretim Emri Gir" altyazi="Yeni üretim emrini buradan kaydet">
 
         {sonKayit && (
-          <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-3">
-            <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
-            <p className="text-emerald-700 text-sm font-medium">
-              <span className="font-bold">{sonKayit}</span> numaralı iş emri başarıyla kaydedildi.
-            </p>
+          <div className="flex items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
+              <p className="text-emerald-700 text-sm font-medium">
+                <span className="font-bold">{sonKayit}</span> numaralı iş emri kaydedildi.
+              </p>
+            </div>
+            <Link href="/is-emirleri"
+              className="flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 text-sm font-semibold whitespace-nowrap">
+              Listeyi gör <ArrowRight size={14}/>
+            </Link>
           </div>
         )}
 
@@ -41,7 +48,12 @@ export default function UretimEmriPage() {
 
         {isEmriListesi.length > 0 && (
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-            <h3 className="text-slate-700 font-semibold text-sm mb-3">Son Kayıtlar</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-slate-700 font-semibold text-sm">Son Kayıtlar</h3>
+              <Link href="/is-emirleri" className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-medium">
+                Tümünü gör <ArrowRight size={12}/>
+              </Link>
+            </div>
             <div className="space-y-2">
               {[...isEmriListesi].reverse().slice(0, 5).map((k) => (
                 <div key={k.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0">
