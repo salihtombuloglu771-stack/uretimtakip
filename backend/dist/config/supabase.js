@@ -7,4 +7,7 @@ exports.supabase = void 0;
 const supabase_js_1 = require("@supabase/supabase-js");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-exports.supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const strip = (s = "") => s.replace(/^﻿/, "").trim();
+const url = strip(process.env.SUPABASE_URL);
+const key = strip(process.env.SUPABASE_KEY);
+exports.supabase = (0, supabase_js_1.createClient)(url, key);

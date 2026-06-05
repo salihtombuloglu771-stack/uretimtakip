@@ -61,6 +61,7 @@ app.get("/health", (_req, res) => {
   res.json({ durum: "çalışıyor", zaman: new Date().toISOString() });
 });
 
+
 // ── Route'lar ────────────────────────────────────────────────────────────────
 app.use("/api/auth",           authRoutes);
 app.use("/api/is-emirleri",    isEmirleriRoutes);
