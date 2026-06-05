@@ -26,7 +26,7 @@ function bakimDurumu(m: Makina): { uyari: boolean; mesaj: string } {
   return { uyari: false, mesaj: `${kalan} gün kaldı` };
 }
 
-const INP = "bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors";
+const INP = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all hover:border-slate-300";
 
 export default function MakinalarPage() {
   const { toast } = useToast();
@@ -141,42 +141,71 @@ export default function MakinalarPage() {
             {formAcik ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
           </button>
           {formAcik && (
-            <div className="px-6 pb-6 border-t border-slate-100">
-              <form onSubmit={handleEkle} className="space-y-4 pt-4">
+            <div className="px-6 pb-6 border-t border-slate-100 animate-fade-in-up">
+              <form onSubmit={handleEkle} className="space-y-5 pt-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Makina No *</label>
-                    <input name="makinaNo" value={form.makinaNo} onChange={handleChange} placeholder="MKN-001" className={INP} />
+                    <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Makina No *</label>
+                    <input name="makinaNo" value={form.makinaNo} onChange={handleChange}
+                      placeholder="ör. MKN-001" className={INP} />
+                    <p className="text-[11px] text-slate-400">Benzersiz makina kimlik kodu</p>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Makina Adı *</label>
-                    <input name="makinaAdi" value={form.makinaAdi} onChange={handleChange} placeholder="CNC Torna" className={INP} />
+                    <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Makina Adı *</label>
+                    <input name="makinaAdi" value={form.makinaAdi} onChange={handleChange}
+                      placeholder="ör. CNC Torna T400" className={INP} />
+                    <p className="text-[11px] text-slate-400">Marka, model veya tanımlayıcı isim</p>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Durum</label>
-                    <select name="durum" value={form.durum} onChange={handleChange} className={INP}>
-                      <option value="aktif">Aktif</option>
-                      <option value="pasif">Pasif</option>
-                    </select>
+                    <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Başlangıç Durumu</label>
+                    <div className="flex gap-2">
+                      {([{ val:"aktif", label:"Aktif", cls:"border-emerald-400 bg-emerald-50 text-emerald-700 ring-2 ring-emerald-100" },
+                         { val:"pasif", label:"Pasif", cls:"border-slate-400 bg-slate-50 text-slate-600 ring-2 ring-slate-100" }
+                      ] as const).map(d => (
+                        <button key={d.val} type="button"
+                          onClick={() => setForm(p => ({ ...p, durum: d.val }))}
+                          className={`flex-1 py-3 rounded-xl border text-sm font-semibold transition-all ${form.durum === d.val ? d.cls : "border-slate-200 text-slate-400 hover:border-slate-300"}`}>
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Son Bakım Tarihi</label>
+                    <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Son Bakım Tarihi</label>
                     <input type="date" name="sonBakimTarihi" value={form.sonBakimTarihi} onChange={handleChange} className={INP} />
+                    <p className="text-[11px] text-slate-400">Bir sonraki bakım bu tarihten hesaplanır</p>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-slate-500 text-xs font-medium uppercase tracking-wide">Bakım Periyodu (Gün)</label>
-                    <input name="bakimPeriyoduGun" value={form.bakimPeriyoduGun} onChange={handleChange} placeholder="90" inputMode="numeric" className={INP} />
+                    <label className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Bakım Periyodu (Gün)</label>
+                    <div className="relative">
+                      <input name="bakimPeriyoduGun" value={form.bakimPeriyoduGun} onChange={handleChange}
+                        placeholder="90" inputMode="numeric" className={INP + " pr-16"} />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium">gün</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[30, 60, 90, 180].map(g => (
+                        <button key={g} type="button"
+                          onClick={() => setForm(p => ({ ...p, bakimPeriyoduGun: String(g) }))}
+                          className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${form.bakimPeriyoduGun === String(g) ? "bg-blue-50 border-blue-300 text-blue-600 font-semibold" : "border-slate-200 text-slate-500 hover:border-slate-300"}`}>
+                          {g}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                {formHata && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">{formHata}</p>}
-                <div className="flex justify-end gap-3">
+                {formHata && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3 animate-shake">
+                    <AlertTriangle size={15} className="flex-shrink-0" /> {formHata}
+                  </div>
+                )}
+                <div className="flex justify-end gap-3 pt-1">
                   <button type="button" onClick={() => setFormAcik(false)}
-                    className="px-4 py-2 text-slate-500 text-sm border border-slate-200 rounded-lg hover:bg-slate-50">İptal</button>
+                    className="px-5 py-2.5 text-slate-500 text-sm border border-slate-200 rounded-xl hover:bg-slate-50">İptal</button>
                   <button type="submit"
-                    className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
-                    <PlusCircle size={15} /> Ekle
+                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm shadow-blue-200">
+                    <PlusCircle size={15} /> Makina Ekle
                   </button>
                 </div>
               </form>
