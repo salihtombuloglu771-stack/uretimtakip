@@ -3,6 +3,7 @@
 
 import { apiAddUrun, apiDeleteUrun, apiGetUrunler } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
@@ -118,9 +119,9 @@ export default function UrunKataloguPage() {
 
         {/* Liste */}
         {liste.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
-            <BookOpen size={40} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">Henüz ürün kaydı yok.</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
+            <EmptyState ikon={BookOpen} baslik="Ürün kataloğu boş"
+              aciklama="Ürettiğiniz ürünleri kod, ad ve birim fiyatıyla tanımlayın." />
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

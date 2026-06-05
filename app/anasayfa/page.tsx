@@ -6,13 +6,23 @@ import {
 } from "@/lib/api";
 import { useState, useEffect, useCallback } from "react";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import {
   FilePlus, Cpu, ShieldCheck, Layers,
   TrendingUp, Clock, AlertTriangle, Play,
   CheckCircle, XCircle, Package,
+  Sun, Sunset, Moon,
 } from "lucide-react";
 import Link from "next/link";
 import { getRol } from "@/components/AuthGuard";
+
+function selamla(kulAdi: string) {
+  const saat = new Date().getHours();
+  const isim = kulAdi ? kulAdi.charAt(0).toUpperCase() + kulAdi.slice(1) : "";
+  if (saat < 12) return { mesaj: `Günaydın${isim ? `, ${isim}` : ""}!`, ikon: Sun,    renk: "text-amber-500" };
+  if (saat < 18) return { mesaj: `İyi öğleden sonralar${isim ? `, ${isim}` : ""}!`, ikon: Sunset, renk: "text-orange-400" };
+  return       { mesaj: `İyi akşamlar${isim ? `, ${isim}` : ""}!`, ikon: Moon,   renk: "text-indigo-400" };
+}
 
 function tarihYaz(str: string) {
   const d = new Date(str);
@@ -32,6 +42,7 @@ function bugunMu(str: string) {
 export default function AnasayfaPage() {
   const [yukluyor, setYukluyor] = useState(true);
   const [isAdmin,  setIsAdmin]  = useState(false);
+  const [kulAdi,   setKulAdi]   = useState("");
 
   const [isEmirleri,  setIsEmirleri]  = useState<Awaited<ReturnType<typeof apiGetIsEmirleri>>>([]);
   const [makinalar,   setMakinalar]   = useState<Awaited<ReturnType<typeof apiGetMakinalar>>>([]);
@@ -57,6 +68,7 @@ export default function AnasayfaPage() {
 
   useEffect(() => {
     setIsAdmin(getRol() === "admin");
+    setKulAdi(localStorage.getItem("uretim_kullanici_adi") ?? "");
     yukle();
   }, [yukle]);
 
@@ -160,6 +172,9 @@ export default function AnasayfaPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   });
 
+  const slam = selamla(kulAdi);
+  const SlamIkon = slam.ikon;
+
   return (
     <PageLayout
       baslik="Ana Sayfa"
@@ -167,6 +182,24 @@ export default function AnasayfaPage() {
       yenile={yukle}
       yukleniyor={yukluyor}
     >
+      {/* Kişisel karşılama */}
+      <div className="animate-fade-in-up flex items-center justify-between bg-white rounded-2xl px-5 py-4 border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+            <SlamIkon size={20} className={slam.renk} />
+          </div>
+          <div>
+            <p className="text-slate-800 font-semibold text-sm">{slam.mesaj}</p>
+            <p className="text-slate-400 text-xs mt-0.5 capitalize">{tarih}</p>
+          </div>
+        </div>
+        {bugunUretim > 0 && (
+          <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+            <CheckCircle size={12} /> Bugün {bugunUretim.toLocaleString("tr-TR")} adet üretildi
+          </div>
+        )}
+      </div>
+
       {/* Özet kartlar */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {OZET_KARTLAR.map((k, i) => (
@@ -201,7 +234,13 @@ export default function AnasayfaPage() {
               <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : aktiviteler.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">Henüz kayıt yok.</div>
+            <EmptyState
+              ikon={FilePlus}
+              baslik="Henüz aktivite yok"
+              aciklama="Üretim emri girildiğinde veya kalite kontrol yapıldığında burada görünür."
+              buton={{ label: "İlk üretim emrini gir", href: "/uretim-emri" }}
+              kucuk
+            />
           ) : (
             <div className="divide-y divide-slate-100">
               {aktiviteler.map((a, i) => (

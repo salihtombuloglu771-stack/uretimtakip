@@ -3,6 +3,7 @@
 
 import { apiAddDepo, apiDeleteDepo, apiGetDepo } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { useState, useEffect, useCallback } from "react";
@@ -155,9 +156,9 @@ export default function UretimDepoPage() {
 
         {/* Hareketler tablosu */}
         {liste.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
-            <Package size={40} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">Henüz hareket kaydı yok.</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
+            <EmptyState ikon={Package} baslik="Üretim deposunda hareket yok"
+              aciklama="Hammadde girişi veya ürün çıkışını buradan kaydedin." />
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

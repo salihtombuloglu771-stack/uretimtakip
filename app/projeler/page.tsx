@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import {
@@ -227,9 +228,9 @@ export default function ProjelerPage() {
         {loading ? (
           <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">Yükleniyor…</div>
         ) : liste.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 flex flex-col items-center gap-3">
-            <FolderKanban size={40} className="text-slate-200"/>
-            <p className="text-slate-500 text-sm">Henüz proje yok. Yeni Proje butonuna tıklayın.</p>
+          <div className="bg-white rounded-xl border border-slate-200">
+            <EmptyState ikon={FolderKanban} baslik="Henüz proje yok"
+              aciklama="Müşteri projelerini, görevleri ve bitiş tarihlerini buradan takip edebilirsiniz." />
           </div>
         ) : (
           <div className="space-y-3">

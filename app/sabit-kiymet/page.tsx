@@ -3,6 +3,7 @@
 
 import { apiAddDemirbas, apiDeleteDemirbas, apiGetDemirbaslar } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
@@ -157,9 +158,9 @@ export default function SabitKiymetPage() {
 
         {/* Liste */}
         {liste.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
-            <Building size={40} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">Henüz demirbaş kaydı yok.</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
+            <EmptyState ikon={Building} baslik="Demirbaş kaydı bulunamadı"
+              aciklama="Fabrika ekipmanları, bilgisayarlar, araçlar gibi varlıklarınızı buraya ekleyin." />
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

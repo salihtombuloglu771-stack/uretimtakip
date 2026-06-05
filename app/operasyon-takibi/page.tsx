@@ -3,6 +3,7 @@
 
 import { apiAddOperasyon, apiGetIsEmirleri, apiGetOperasyonlar, apiUpdateOpBitis } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import { useState, useEffect } from "react";
 import { Play, StopCircle, ClipboardList } from "lucide-react";
 import type { IsEmri, Operasyon } from "@/data/types";
@@ -84,9 +85,10 @@ export default function OperasyonTakibiPage() {
 
         {/* İş emirleri tablosu */}
         {isEmriListesi.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
-            <ClipboardList size={40} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">Henüz iş emri kaydı yok.</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
+            <EmptyState ikon={ClipboardList} baslik="Operasyon başlatmak için önce iş emri girin"
+              aciklama="Üretim emri kaydedildikten sonra buradan başlat/durdur yapabilirsiniz."
+              buton={{ label: "Üretim Emri Gir", href: "/uretim-emri" }} />
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

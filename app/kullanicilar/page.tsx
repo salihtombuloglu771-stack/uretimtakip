@@ -3,6 +3,7 @@
 
 import { apiAddKullanici, apiDeleteKullanici, apiGetKullanicilar, apiUpdateKullaniciRol } from "@/lib/api";
 import PageLayout from "@/components/PageLayout";
+import EmptyState from "@/components/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { useState, useEffect } from "react";
@@ -179,9 +180,9 @@ export default function KullanicilarPage() {
         {loading ? (
           <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-400 text-sm shadow-sm">Yükleniyor…</div>
         ) : liste.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center gap-3 shadow-sm">
-            <Shield size={40} className="text-slate-300" />
-            <p className="text-slate-500 text-sm">Henüz kullanıcı kaydı yok.</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
+            <EmptyState ikon={Shield} baslik="Henüz kullanıcı eklenmemiş"
+              aciklama="Ekibinize admin veya operatör rolüyle kullanıcı ekleyin." />
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
