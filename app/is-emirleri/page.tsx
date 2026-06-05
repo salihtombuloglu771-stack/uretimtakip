@@ -1,6 +1,6 @@
 "use client";
 
-import { apiDeleteIsEmri, apiGetIsEmirleri } from "@/lib/api";
+import { deleteIsEmri, getIsEmirleri } from "@/lib/db";
 import { useState, useEffect, useCallback } from "react";
 import PageLayout from "@/components/PageLayout";
 import StatsCards from "@/components/StatsCards";
@@ -23,7 +23,7 @@ export default function IsEmirleriSayfasi() {
     setYukluyor(true);
     setHata("");
     try {
-      const data = await apiGetIsEmirleri();
+      const data = await getIsEmirleri();
       setListe(data);
     } catch {
       setHata("Veriler yüklenemedi.");
@@ -37,7 +37,7 @@ export default function IsEmirleriSayfasi() {
   async function handleSil() {
     if (!silId) return;
     try {
-      await apiDeleteIsEmri(silId);
+      await deleteIsEmri(silId);
       setListe(p => p.filter(k => k.id !== silId));
       toast("İş emri silindi.", "basari");
     } catch {
