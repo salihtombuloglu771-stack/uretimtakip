@@ -70,9 +70,13 @@ app.use("/api", diger_1.default);
 app.use(guvenlik_1.bilinmeyenRoute);
 app.use(guvenlik_1.hataIsleyici);
 // ── Sunucu başlat ────────────────────────────────────────────────────────────
-Promise.all([(0, database_1.initDB)(), (0, pgdb_1.migratePg)()]).then(() => {
-    app.listen(PORT, () => {
-        console.log(`✅ NexPlan Backend — http://localhost:${PORT}`);
-        console.log(`🔒 Güvenlik: Helmet + Rate Limit + CORS + XSS Filtresi aktif`);
+const initPromise = Promise.all([(0, database_1.initDB)(), (0, pgdb_1.migratePg)()]);
+if (process.env.VERCEL !== "1") {
+    initPromise.then(() => {
+        app.listen(PORT, () => {
+            console.log(`✅ NexPlan Backend — http://localhost:${PORT}`);
+            console.log(`🔒 Güvenlik: Helmet + Rate Limit + CORS + XSS Filtresi aktif`);
+        });
     });
-});
+}
+exports.default = app;

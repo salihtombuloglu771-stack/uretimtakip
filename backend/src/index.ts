@@ -76,9 +76,15 @@ app.use(bilinmeyenRoute);
 app.use(hataIsleyici);
 
 // ── Sunucu başlat ────────────────────────────────────────────────────────────
-Promise.all([initDB(), migratePg()]).then(() => {
-  app.listen(PORT, () => {
-    console.log(`✅ NexPlan Backend — http://localhost:${PORT}`);
-    console.log(`🔒 Güvenlik: Helmet + Rate Limit + CORS + XSS Filtresi aktif`);
+const initPromise = Promise.all([initDB(), migratePg()]);
+
+if (process.env.VERCEL !== "1") {
+  initPromise.then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ NexPlan Backend — http://localhost:${PORT}`);
+      console.log(`🔒 Güvenlik: Helmet + Rate Limit + CORS + XSS Filtresi aktif`);
+    });
   });
-});
+}
+
+export default app;
