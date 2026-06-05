@@ -1,7 +1,8 @@
 // Backend API istemcisi — tüm veri işlemleri buradan yapılır
 
-const _url = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-const BASE = (_url.charCodeAt(0) === 0xFEFF ? _url.slice(1) : _url).replace(/\/$/, "");
+const PROD_API = "https://backend-gamma-dun-25.vercel.app";
+const _url = process.env.NEXT_PUBLIC_API_URL ?? PROD_API;
+const BASE = (_url.replace(/^﻿/, "").trim() || PROD_API).replace(/\/$/, "");
 
 function token(): string {
   if (typeof window === "undefined") return "";
