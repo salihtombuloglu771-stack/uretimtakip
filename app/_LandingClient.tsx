@@ -36,6 +36,17 @@ export default function LandingPage() {
   const [gonderildi, setGonderildi] = useState(false);
 
   useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add("in-view"); obs.unobserve(e.target); }
+      }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".reveal, .reveal-scale, .reveal-left").forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
     setOturum(!!localStorage.getItem("uretim_oturum"));
   }, []);
 
@@ -83,19 +94,23 @@ export default function LandingPage() {
       {/* ── HERO ── */}
       <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 rounded-full px-4 py-1.5 text-blue-300 text-sm font-medium mb-8">
+          <div className="animate-fade-in-up inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 rounded-full px-4 py-1.5 text-blue-300 text-sm font-medium mb-8"
+            style={{ animationDelay: "0ms" }}>
             <Star size={14} className="fill-blue-400 text-blue-400" />
             Türkiye'nin Modern Üretim ERP'si
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+          <h1 className="animate-fade-in-up text-4xl md:text-6xl font-bold leading-tight mb-6"
+            style={{ animationDelay: "100ms" }}>
             Üretiminizi<br />
             <span className="text-blue-400">Dijitalleştirin</span>
           </h1>
-          <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="animate-fade-in-up text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+            style={{ animationDelay: "200ms" }}>
             İş emirleri, makina takibi, kalite kontrol ve stok yönetimini tek platformda toplayın.
             Kurulum gerektirmez, tarayıcıdan çalışır.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="animate-fade-in-up flex flex-col sm:flex-row gap-4 justify-center"
+            style={{ animationDelay: "320ms" }}>
             <a href="#demo" className="bg-blue-500 hover:bg-blue-400 text-white font-semibold px-8 py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-base">
               Ücretsiz Demo İste <ArrowRight size={18} />
             </a>
@@ -103,7 +118,9 @@ export default function LandingPage() {
               Giriş Yap
             </Link>
           </div>
-          <p className="text-slate-400 text-sm mt-6">30 gün ücretsiz · Kredi kartı gerekmez · Kurulum yok</p>
+          <p className="animate-fade-in-up text-slate-400 text-sm mt-6" style={{ animationDelay: "420ms" }}>
+            30 gün ücretsiz · Kredi kartı gerekmez · Kurulum yok
+          </p>
         </div>
       </section>
 
@@ -127,13 +144,15 @@ export default function LandingPage() {
       {/* ── ÖZELLİKLER ── */}
       <section id="ozellikler" className="py-20 px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="reveal text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Her Şey Tek Platformda</h2>
             <p className="text-slate-500 text-lg max-w-xl mx-auto">Fabrikadan depoya, kaliteden raporlamaya — üretim sürecinizin tamamını yönetin.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {OZELLIKLER.map(({ ikon: Ikon, baslik, aciklama }) => (
-              <div key={baslik} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all">
+            {OZELLIKLER.map(({ ikon: Ikon, baslik, aciklama }, i) => (
+              <div key={baslik}
+                className="reveal card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:border-blue-200"
+                style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
                 <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
                   <Ikon size={22} className="text-blue-600" />
                 </div>
@@ -148,13 +167,13 @@ export default function LandingPage() {
       {/* ── NASIL ÇALIŞIR ── */}
       <section id="nasil-calisir" className="py-20 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="reveal text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">3 Adımda Başlayın</h2>
             <p className="text-slate-500 text-lg">Karmaşık kurulum yok. Bugün talep edin, yarın kullanmaya başlayın.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {ADIMLAR.map(({ no, baslik, aciklama }) => (
-              <div key={no} className="text-center">
+            {ADIMLAR.map(({ no, baslik, aciklama }, i) => (
+              <div key={no} className="reveal-scale text-center" style={{ transitionDelay: `${i * 100}ms` }}>
                 <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold mx-auto mb-5">{no}</div>
                 <h3 className="text-slate-800 font-semibold text-lg mb-2">{baslik}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">{aciklama}</p>
@@ -167,7 +186,7 @@ export default function LandingPage() {
       {/* ── NEDEN NEXPLAN ── */}
       <section className="py-20 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="reveal text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-800 mb-4">Neden NexPlan?</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -180,8 +199,10 @@ export default function LandingPage() {
               "Kullanıcı yetkilendirme sistemi",
               "Gerçek zamanlı operasyon takibi",
               "7/24 kesintisiz erişim",
-            ].map((madde) => (
-              <div key={madde} className="flex items-center gap-3 bg-white rounded-xl px-5 py-4 border border-slate-100">
+            ].map((madde, i) => (
+              <div key={madde}
+                className="reveal-left flex items-center gap-3 bg-white rounded-xl px-5 py-4 border border-slate-100 card-hover"
+                style={{ transitionDelay: `${i * 60}ms` }}>
                 <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
                 <span className="text-slate-700 text-sm font-medium">{madde}</span>
               </div>
@@ -193,7 +214,7 @@ export default function LandingPage() {
       {/* ── FİYATLANDIRMA ── */}
       <section id="fiyat" className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="reveal text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Şeffaf Fiyatlandırma</h2>
             <p className="text-slate-500 text-lg">Gizli ücret yok. İstediğin zaman iptal et.</p>
           </div>
@@ -217,8 +238,10 @@ export default function LandingPage() {
                 ozellikler: ["Sınırsız kullanıcı", "Tüm Pro özellikleri", "Özel modül geliştirme", "API entegrasyonu", "7/24 telefon destek", "Yerinde kurulum"],
                 renk: "border-slate-200", butonRenk: "bg-slate-800 hover:bg-slate-700", populer: false,
               },
-            ].map((paket) => (
-              <div key={paket.ad} className={`relative rounded-2xl border-2 p-7 flex flex-col ${paket.renk}`}>
+            ].map((paket, i) => (
+              <div key={paket.ad}
+                className={`reveal-scale relative rounded-2xl border-2 p-7 flex flex-col ${paket.renk}`}
+                style={{ transitionDelay: `${i * 100}ms` }}>
                 {paket.populer && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
                     EN POPÜLER

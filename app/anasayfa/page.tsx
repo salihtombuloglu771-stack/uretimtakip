@@ -169,9 +169,10 @@ export default function AnasayfaPage() {
     >
       {/* Özet kartlar */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {OZET_KARTLAR.map(k => (
+        {OZET_KARTLAR.map((k, i) => (
           <Link key={k.baslik} href={k.href}
-            className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all group">
+            className="animate-fade-in-up bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5 transition-all group"
+            style={{ animationDelay: `${i * 60}ms` }}>
             <div className="flex items-center justify-between mb-3">
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${k.bg} ${k.renk}`}>
                 {k.ikon}
@@ -203,8 +204,10 @@ export default function AnasayfaPage() {
             <div className="py-12 text-center text-slate-400 text-sm">Henüz kayıt yok.</div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {aktiviteler.map(a => (
-                <div key={a.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors">
+              {aktiviteler.map((a, i) => (
+                <div key={a.id}
+                  className="animate-fade-in-up flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors"
+                  style={{ animationDelay: `${i * 40}ms` }}>
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${a.renk}`}>
                     {a.ikon}
                   </div>
